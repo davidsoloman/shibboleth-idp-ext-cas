@@ -8,7 +8,6 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>net.shibboleth</groupId>
   <artifactId>idp-cas-api</artifactId>
   <packaging>jar</packaging>
 
@@ -19,5 +18,22 @@
   </properties>
 
   <dependencies>
+    <!-- Compile dependencies -->
+    <dependency>
+      <groupId>net.shibboleth.idp</groupId>
+      <artifactId>idp-profile-api</artifactId>
+      <version>${shib.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-messaging-api</artifactId>
+      <version>${opensaml.version}</version>
+    </dependency>
+
+    <!-- Runtime dependencies -->
+
+    <!-- Provided dependencies -->
+
+    <!-- Test dependencies -->
   </dependencies>
 </project>

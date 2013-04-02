@@ -21,7 +21,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>net.shibboleth</groupId>
+      <groupId>net.shibboleth.idp</groupId>
       <artifactId>idp-cas-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -29,6 +29,7 @@
       <groupId>net.shibboleth.idp</groupId>
       <artifactId>idp-war</artifactId>
       <version>${shib.version}</version>
+      <type>war</type>
     </dependency>
   </dependencies>
 </project>

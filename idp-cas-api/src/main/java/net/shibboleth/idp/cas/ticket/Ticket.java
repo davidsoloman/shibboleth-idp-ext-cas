@@ -16,6 +16,8 @@
  */
 package net.shibboleth.idp.cas.ticket;
 
+import javax.annotation.Nonnull;
+
 import org.joda.time.Instant;
 
 /**
@@ -26,10 +28,10 @@ import org.joda.time.Instant;
  */
 public class Ticket {
     /** Ticket identifier. */
-    private final String id;
+    @Nonnull private final String id;
 
     /** Expiration instant. */
-    private final Instant expirationInstant;
+    @Nonnull private final Instant expirationInstant;
 
     /**
      * Creates a new ticket with an identifier and expiration date.
@@ -37,7 +39,7 @@ public class Ticket {
      * @param id Ticket ID.
      * @param expiration Expiration instant.
      */
-    public Ticket(final String id, final Instant expiration) {
+    public Ticket(@Nonnull final String id, @Nonnull final Instant expiration) {
         this.id = id;
         this.expirationInstant = expiration;
     }
@@ -48,5 +50,23 @@ public class Ticket {
 
     public Instant getExpirationInstant() {
         return expirationInstant;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o == null || !(o instanceof Ticket)) {
+            return false;
+        }
+        return ((Ticket ) o).id.equals(id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 23 + 31 * id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return id;
     }
 }

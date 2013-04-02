@@ -81,7 +81,9 @@ public class GenerateTicketAction extends AbstractProfileAction {
         final Ticket ticket;
         try {
             ticket = ticketFactory.createTicket();
+            log.debug("Persisting ticket {}", ticket);
             ticketStore.persist(ticket.getId(), ticket);
+            messageContext.getMessage().setTicket(ticket.getId());
         } catch (RuntimeException e) {
             return ActionSupport.buildEvent(this, "ticketGenerationFailed", new LocalAttributeMap("error", e));
         }

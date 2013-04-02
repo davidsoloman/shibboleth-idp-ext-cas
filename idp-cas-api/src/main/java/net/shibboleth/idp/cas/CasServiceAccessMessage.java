@@ -58,7 +58,7 @@ public class CasServiceAccessMessage {
         return ticket;
     }
 
-    void setTicket(@Nonnull final String ticket) {
+    public void setTicket(@Nonnull final String ticket) {
         this.ticket = ticket;
     }
 

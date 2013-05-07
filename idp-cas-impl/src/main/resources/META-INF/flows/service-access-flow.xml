@@ -54,8 +54,8 @@
 
   <action-state id="generateTicket">
     <evaluate expression="generateTicketAction" />
-    <transition on="ticketGenerated" to="constructRedirectUrl" />
-    <transition on="ticketGenerationFailed" to="error" />
+    <transition on="ticketCreated" to="constructRedirectUrl" />
+    <transition on="ticketCreationFailed" to="error" />
   </action-state>
 
   <action-state id="constructRedirectUrl">

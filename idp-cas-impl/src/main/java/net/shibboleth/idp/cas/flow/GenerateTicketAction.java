@@ -17,40 +17,24 @@
 package net.shibboleth.idp.cas.flow;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import net.shibboleth.ext.spring.webflow.Event;
-import net.shibboleth.ext.spring.webflow.Events;
 import net.shibboleth.idp.cas.CasServiceAccessMessage;
 import net.shibboleth.idp.cas.ticket.Ticket;
 import net.shibboleth.idp.cas.ticket.TicketFactory;
 import net.shibboleth.idp.persistence.PersistenceManager;
-import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
-import net.shibboleth.idp.profile.ProfileException;
-import net.shibboleth.idp.profile.ProfileRequestContext;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.profile.ProfileException;
+import org.opensaml.profile.action.AbstractProfileAction;
+import org.opensaml.profile.action.ActionSupport;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.webflow.core.collection.LocalAttributeMap;
 
 /**
  * Generates and stores a CAS protocol ticket.
  *
  * @author Marvin S. Addison
  */
-@Events({
-        @Event(
-                id = "ticketGenerated",
-                description = "Ticket successfully generated.",
-                attributes = "ticket"),
-        @Event(
-                id = "ticketGenerationFailed",
-                description = "Ticket creation or storage failed.",
-                attributes = "error")
-})
 public class GenerateTicketAction extends AbstractProfileAction {
 
     /** Class logger. */
@@ -72,10 +56,7 @@ public class GenerateTicketAction extends AbstractProfileAction {
 
     /** {@inheritDoc} */
     @Override
-    protected org.springframework.webflow.execution.Event doExecute(
-            @Nullable final HttpServletRequest httpRequest,
-            @Nullable final HttpServletResponse httpResponse,
-            @Nonnull final ProfileRequestContext profileRequestContext) throws ProfileException {
+    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) throws ProfileException {
 
         final MessageContext<CasServiceAccessMessage> messageContext = profileRequestContext.getInboundMessageContext();
         final Ticket ticket;
@@ -85,8 +66,8 @@ public class GenerateTicketAction extends AbstractProfileAction {
             ticketStore.persist(ticket.getId(), ticket);
             messageContext.getMessage().setTicket(ticket.getId());
         } catch (RuntimeException e) {
-            return ActionSupport.buildEvent(this, "ticketGenerationFailed", new LocalAttributeMap("error", e));
+            ActionSupport.buildEvent(profileRequestContext, Events.TicketCreationFailed.id());
         }
-        return ActionSupport.buildEvent(this, "ticketGenerated", new LocalAttributeMap("ticket", ticket));
+        ActionSupport.buildEvent(profileRequestContext, Events.TicketCreated.id());
     }
 }

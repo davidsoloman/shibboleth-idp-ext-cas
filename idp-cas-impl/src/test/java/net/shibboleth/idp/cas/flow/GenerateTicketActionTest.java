@@ -19,10 +19,12 @@ package net.shibboleth.idp.cas.flow;
 import net.shibboleth.idp.cas.CasServiceAccessMessage;
 import net.shibboleth.idp.cas.Protocol;
 import net.shibboleth.idp.cas.ticket.SimpleTicketStore;
-import net.shibboleth.idp.cas.ticket.Ticket;
-import net.shibboleth.idp.profile.ProfileRequestContext;
+import net.shibboleth.idp.profile.impl.WebFlowProfileActionAdaptor;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.profile.context.EventContext;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,10 +48,12 @@ import static org.testng.AssertJUnit.assertNotNull;
 public class GenerateTicketActionTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private GenerateTicketAction generateTicketAction;
+    @Qualifier("generateTicket")
+    private WebFlowProfileActionAdaptor generateTicketAction;
 
     @Autowired
     private SimpleTicketStore simpleTicketStore;
+
 
     @DataProvider(name = "messages")
     public Object[][] provideMessages() {
@@ -60,12 +64,11 @@ public class GenerateTicketActionTest extends AbstractTestNGSpringContextTests {
 
     @Test(dataProvider = "messages")
     public void testExecute(final CasServiceAccessMessage message) throws Exception {
-        final Event event = generateTicketAction.execute(newTestRequestContext(message));
-        assertEquals("ticketGenerated", event.getId());
-        final Ticket ticket = (Ticket) event.getAttributes().get("ticket");
+        final Event result = generateTicketAction.execute(newTestRequestContext(message));
+        assertEquals(Events.TicketCreated.id(), result.getId());
+        final String ticket = message.getTicket();
         assertNotNull(ticket);
-        assertEquals(ticket.getId(), message.getTicket());
-        assertEquals(ticket, simpleTicketStore.get(ticket.getId()));
+        assertEquals(ticket, simpleTicketStore.get(ticket).getId());
     }
 
     private static RequestContext newTestRequestContext(final CasServiceAccessMessage message) {

@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
  */
 public class CasServiceAccessMessage {
     /** Protocol used to specify service access request. */
-    @Nonnull final Protocol protocol;
+    @Nonnull private final Protocol protocol;
 
     /** Service URL */
     @Nonnull private final String service;

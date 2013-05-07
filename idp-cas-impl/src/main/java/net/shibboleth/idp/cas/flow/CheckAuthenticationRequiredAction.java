@@ -17,25 +17,19 @@
 package net.shibboleth.idp.cas.flow;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.base.Function;
-import net.shibboleth.ext.spring.webflow.Event;
-import net.shibboleth.ext.spring.webflow.Events;
 import net.shibboleth.idp.cas.CasServiceAccessMessage;
-import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
-import net.shibboleth.idp.profile.ProfileException;
-import net.shibboleth.idp.profile.ProfileRequestContext;
 import net.shibboleth.idp.session.IdPSession;
 import net.shibboleth.idp.session.IdPSessionContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
+import org.opensaml.profile.ProfileException;
+import org.opensaml.profile.action.AbstractProfileAction;
+import org.opensaml.profile.action.ActionSupport;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.webflow.core.collection.LocalAttributeMap;
 
 /**
  * Determines whether authentication is required by examining both SSO session state and CAS
@@ -43,19 +37,6 @@ import org.springframework.webflow.core.collection.LocalAttributeMap;
  *
  * @author Marvin S. Addison
  */
-@Events({
-        @Event(
-                id = "sessionNotFound",
-                description = "SSO session NOT found for current profile request context."),
-        @Event(
-                id = "sessionNotFound",
-                description = "SSO session found for current profile request context.",
-                attributes = "session"),
-        @Event(
-                id = "renewRequested",
-                description = "CAS service access request specifies renew=true.",
-                attributes = "session")
-})
 public class CheckAuthenticationRequiredAction extends AbstractProfileAction {
 
     /** Class logger. */
@@ -67,27 +48,23 @@ public class CheckAuthenticationRequiredAction extends AbstractProfileAction {
 
     /** {@inheritDoc} */
     @Override
-    protected org.springframework.webflow.execution.Event doExecute(
-            @Nullable final HttpServletRequest httpRequest,
-            @Nullable final HttpServletResponse httpResponse,
-            @Nonnull final ProfileRequestContext profileRequestContext) throws ProfileException {
+    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) throws ProfileException {
 
         final IdPSessionContext sessionCtx = sessionCtxLookupStrategy.apply(profileRequestContext);
         if (sessionCtx == null) {
             log.debug("No session currently exists");
-            return ActionSupport.buildEvent(this, "noSession");
+            ActionSupport.buildEvent(profileRequestContext, Events.SessionNotFound.id());
+            return;
         }
         final IdPSession session = sessionCtx.getIdPSession();
         log.debug("Found session ID {}", session.getId());
 
         final MessageContext<CasServiceAccessMessage> messageContext = profileRequestContext.getInboundMessageContext();
-        final String eventId;
         if (messageContext.getMessage().isRenew()) {
             log.debug("CAS service access message has renew flag set. Forced authentication required.");
-            eventId = "forceAuthentication";
+            ActionSupport.buildEvent(profileRequestContext, Events.RenewRequested.id());
         } else {
-            eventId = "hasSession";
+            ActionSupport.buildEvent(profileRequestContext, Events.SessionFound.id());
         }
-        return ActionSupport.buildEvent(this, eventId, new LocalAttributeMap("session", session));
     }
 }

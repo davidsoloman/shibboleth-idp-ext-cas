@@ -18,6 +18,9 @@ package net.shibboleth.idp.cas.ticket;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.idp.cas.ticket.metadata.Expiration;
+import net.shibboleth.idp.cas.ticket.metadata.Key;
+import net.shibboleth.idp.cas.ticket.metadata.Value;
 import org.joda.time.Instant;
 
 /**
@@ -26,26 +29,44 @@ import org.joda.time.Instant;
  *
  * @author Marvin S. Addison
  */
+@Key("id")
+@Value("service")
+@Expiration("expirationInstant")
 public class Ticket {
     /** Ticket identifier. */
-    @Nonnull private final String id;
+    @Nonnull private String id;
+
+    /** Service/relying party that requested the ticket. */
+    @Nonnull private String service;
 
     /** Expiration instant. */
-    @Nonnull private final Instant expirationInstant;
+    @Nonnull private Instant expirationInstant;
 
     /**
-     * Creates a new ticket with an identifier and expiration date.
+     * Creates a new instance with empty values. This version is intended for use with
+     * {@link net.shibboleth.idp.cas.ticket.metadata.MetaDataUtil}.
+     */
+    Ticket() {}
+
+    /**
+     * Creates a new ticket with an identifier, service, and expiration date.
      *
      * @param id Ticket ID.
+     * @param service Service that requested the ticket.
      * @param expiration Expiration instant.
      */
-    public Ticket(@Nonnull final String id, @Nonnull final Instant expiration) {
+    public Ticket(@Nonnull final String id, @Nonnull final String service, @Nonnull final Instant expiration) {
         this.id = id;
+        this.service = service;
         this.expirationInstant = expiration;
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getService() {
+        return service;
     }
 
     public Instant getExpirationInstant() {
@@ -57,12 +78,13 @@ public class Ticket {
         if (o == null || !(o instanceof Ticket)) {
             return false;
         }
-        return ((Ticket ) o).id.equals(id);
+        final Ticket other = (Ticket) o;
+        return other.id.equals(id) && other.service.equals(service);
     }
 
     @Override
     public int hashCode() {
-        return 23 + 31 * id.hashCode();
+        return 23 + 31 * id.hashCode() + 35 * service.hashCode();
     }
 
     @Override

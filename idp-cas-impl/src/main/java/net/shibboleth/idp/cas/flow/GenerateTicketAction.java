@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import net.shibboleth.idp.cas.CasServiceAccessMessage;
 import net.shibboleth.idp.cas.ticket.Ticket;
 import net.shibboleth.idp.cas.ticket.TicketFactory;
+import net.shibboleth.idp.cas.ticket.TicketStore;
 import net.shibboleth.idp.persistence.PersistenceManager;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.ProfileException;
@@ -44,27 +45,27 @@ public class GenerateTicketAction extends AbstractProfileAction {
     @Nonnull private TicketFactory ticketFactory;
 
     /** Ticket store. */
-    @Nonnull private PersistenceManager<Ticket> ticketStore;
+    @Nonnull private TicketStore ticketStore;
 
     public void setTicketFactory(@Nonnull final TicketFactory ticketFactory) {
         this.ticketFactory = ticketFactory;
     }
 
-    public void setTicketStore(@Nonnull final PersistenceManager<Ticket> ticketStore) {
+    public void setTicketStore(@Nonnull final TicketStore ticketStore) {
         this.ticketStore = ticketStore;
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) throws ProfileException {
-
         final MessageContext<CasServiceAccessMessage> messageContext = profileRequestContext.getInboundMessageContext();
+        final CasServiceAccessMessage message = messageContext.getMessage();
         final Ticket ticket;
         try {
-            ticket = ticketFactory.createTicket();
+            ticket = ticketFactory.createTicket(message.getService());
             log.debug("Persisting ticket {}", ticket);
-            ticketStore.persist(ticket.getId(), ticket);
-            messageContext.getMessage().setTicket(ticket.getId());
+            ticketStore.add(ticket);
+            message.setTicket(ticket.getId());
         } catch (RuntimeException e) {
             ActionSupport.buildEvent(profileRequestContext, Events.TicketCreationFailed.id());
         }

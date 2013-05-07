@@ -34,6 +34,10 @@
     </property>
   </bean>
 
-  <bean id="ticketStore" class="net.shibboleth.idp.cas.ticket.SimpleTicketStore" />
+  <bean id="ticketStore" class="net.shibboleth.idp.cas.ticket.DelegatingTicketStore">
+    <constructor-arg>
+      <bean class="org.opensaml.util.storage.impl.MemoryStorageService" />
+    </constructor-arg>
+  </bean>
 
 </beans>

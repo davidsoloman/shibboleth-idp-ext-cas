@@ -18,10 +18,9 @@ package net.shibboleth.idp.cas.flow;
 
 import net.shibboleth.idp.cas.CasServiceAccessMessage;
 import net.shibboleth.idp.cas.Protocol;
-import net.shibboleth.idp.cas.ticket.SimpleTicketStore;
+import net.shibboleth.idp.cas.ticket.TicketStore;
 import net.shibboleth.idp.profile.impl.WebFlowProfileActionAdaptor;
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.context.EventContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,7 +51,7 @@ public class GenerateTicketActionTest extends AbstractTestNGSpringContextTests {
     private WebFlowProfileActionAdaptor generateTicketAction;
 
     @Autowired
-    private SimpleTicketStore simpleTicketStore;
+    private TicketStore ticketStore;
 
 
     @DataProvider(name = "messages")
@@ -68,7 +67,7 @@ public class GenerateTicketActionTest extends AbstractTestNGSpringContextTests {
         assertEquals(Events.TicketCreated.id(), result.getId());
         final String ticket = message.getTicket();
         assertNotNull(ticket);
-        assertEquals(ticket, simpleTicketStore.get(ticket).getId());
+        assertEquals(ticket, ticketStore.get(ticket).getId());
     }
 
     private static RequestContext newTestRequestContext(final CasServiceAccessMessage message) {

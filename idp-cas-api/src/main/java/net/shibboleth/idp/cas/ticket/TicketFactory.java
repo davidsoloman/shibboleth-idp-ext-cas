@@ -42,9 +42,17 @@ public class TicketFactory {
         this.ticketValidityPeriod = period;
     }
 
-    public Ticket createTicket() {
+    /**
+     * Creates a ticket for the requesting service.
+     *
+     * @param service Requester.
+     *
+     * @return Protocol-specific ticket.
+     */
+    public Ticket createTicket(final String service) {
         return new Ticket(
                 ticketIdGenerator.generate(),
+                service,
                 DateTime.now().plus(ticketValidityPeriod).toInstant());
     }
 

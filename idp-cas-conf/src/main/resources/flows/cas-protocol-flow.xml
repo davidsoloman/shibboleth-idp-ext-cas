@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Licensed to the University Corporation for Advanced Internet Development,
+  ~ Inc. (UCAID) under one or more contributor license agreements.  See the
+  ~ NOTICE file distributed with this work for additional information regarding
+  ~ copyright ownership. The UCAID licenses this file to You under the Apache
+  ~ License, Version 2.0 (the "License"); you may not use this file except in
+  ~ compliance with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+  <on-start>
+    <evaluate expression="initProfileRequestContext"/>
+  </on-start>
+
+  <action-state id="dispatchProtocol">
+    <evaluate expression="dispatchProtocolAction" />
+    <transition on="login" to="initializeLogin"/>
+    <transition on="validate" to="initializeValidate"/>
+    <transition on="serviceValidate" to="initializeValidate"/>
+    <transition on="proxy" to="initializeProxy"/>
+    <transition on="proxyValidate" to="initializeProxyValidate"/>
+  </action-state>
+
+  <action-state id="initializeLogin">
+    <evaluate expression="initializeLoginAction" />
+    <transition on="proceed" to="checkAuthenticationRequired" />
+  </action-state>
+
+  <action-state id="checkAuthenticationRequired">
+    <evaluate expression="checkAuthenticationRequiredAction"/>
+    <transition on="sessionNotFound" to="authenticate" />
+    <transition on="sessionFound" to="generateTicket" />
+    <transition on="renewRequested" to="authenticate" />
+    <transition on="gatewayRequested" to="gatewayRedirect" />
+  </action-state>
+
+  <subflow-state id="authenticate" subflow="Authenticate">
+    <transition on="proceed" to="grantServiceTicket" />
+  </subflow-state>
+
+  <action-state id="grantServiceTicket">
+    <evaluate expression="grantServiceTicketAction" />
+    <transition on="ticketCreated" to="redirectToService" />
+    <transition on="ticketCreationFailed" to="error" />
+  </action-state>
+
+  <end-state id="redirectToService" view="externalRedirect:${requestScope.serviceTicketResponse.redirectUrl}" />
+
+  <end-state id="gatewayRedirect" view="externalRedirect:${requestScope.serviceTicketRequest.service}" />
+
+  <end-state id="error" view="profileErrorView" />
+  <end-state id="protocolViolation" view="profileErrorView" />
+
+  <bean-import resource="cas-protocol-beans.xml" />
+
+</flow>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+
+    <!-- Context config params -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/common/global-beans.xml /WEB-INF/common/mvc-beans.xml</param-value>
+    </context-param>
+
+    <!-- Listeners -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    
+    <!-- Filters and filter mappings -->
+    <filter>
+        <filter-name>RequestResponseContextFilter</filter-name>
+        <filter-class>net.shibboleth.utilities.java.support.net.RequestResponseContextFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RequestResponseContextFilter</filter-name>
+        <url-pattern>/idp/*</url-pattern>
+    </filter-mapping>
+
+
+    <!-- Servlets and servlet mappings -->
+    <servlet>
+        <servlet-name>idp</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/idp-servlet.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>idp</servlet-name>
+        <url-pattern>/idp/*</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>client</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/client-servlet.xml</param-value>
+        </init-param>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>client</servlet-name>
+        <url-pattern>/client/*</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- Container security config -->
+    <security-constraint>
+        <display-name>IdP CAS Test Webapp</display-name>
+        <web-resource-collection>
+            <web-resource-name>Secure Area</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+</web-app>

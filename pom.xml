@@ -2,6 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>net.shibboleth</groupId>
+    <artifactId>parent-v3</artifactId>
+    <version>TRUNK-SNAPSHOT</version>
+  </parent>
+
   <groupId>net.shibboleth.idp</groupId>
   <artifactId>shibboleth-idp-ext-cas</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -11,11 +17,8 @@
   <url>https://github.com/serac/shibboleth-idp-ext-cas</url>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <opensaml.version>3.0-SNAPSHOT</opensaml.version>
     <shib.version>3.0-SNAPSHOT</shib.version>
-    <slf4j.version>1.7.5</slf4j.version>
-    <spring.version>3.1.1.RELEASE</spring.version>
   </properties>
 
   <repositories>
@@ -36,9 +39,9 @@
   </repositories>
 
   <modules>
-    <module>idp-cas-api</module>
-    <module>idp-cas-impl</module>
-    <module>idp-war-overlay</module>
+    <module>cas-protocol</module>
+    <module>idp-cas-conf</module>
+    <module>idp-cas-webapp</module>
   </modules>
 
   <dependencies>
@@ -51,7 +54,7 @@
     <dependency>
       <groupId>net.shibboleth.utilities</groupId>
       <artifactId>java-support</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>2.0-SNAPSHOT</version>
     </dependency>
 
     <!-- Runtime dependencies -->
@@ -72,5 +75,19 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.0</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

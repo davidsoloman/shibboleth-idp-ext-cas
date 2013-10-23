@@ -18,6 +18,7 @@ package net.shibboleth.idp.cas.ticket;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.joda.time.Instant;
 import org.opensaml.storage.annotation.Context;
 import org.opensaml.storage.annotation.Key;
@@ -58,20 +59,20 @@ public class Ticket {
      * @param expiration Expiration instant.
      */
     public Ticket(@Nonnull final String id, @Nonnull final String service, @Nonnull final Instant expiration) {
-        this.id = id;
-        this.service = service;
-        this.expirationInstant = expiration;
+        this.id = Constraint.isNotNull(id, "ID cannot be null");
+        this.service = Constraint.isNotNull(service, "Service cannot be null");
+        this.expirationInstant = Constraint.isNotNull(expiration, "Expiration cannot be null");
     }
 
-    public String getId() {
+    @Nonnull public String getId() {
         return id;
     }
 
-    public String getService() {
+    @Nonnull public String getService() {
         return service;
     }
 
-    public Instant getExpirationInstant() {
+    @Nonnull public Instant getExpirationInstant() {
         return expirationInstant;
     }
 

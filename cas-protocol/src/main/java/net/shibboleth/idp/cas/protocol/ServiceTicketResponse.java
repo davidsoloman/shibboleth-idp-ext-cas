@@ -2,6 +2,7 @@ package net.shibboleth.idp.cas.protocol;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -25,18 +26,16 @@ public class ServiceTicketResponse {
      * @param service Service that requested ticket.
      * @param ticket Granted service ticket.
      */
-    public ServiceTicketResponse(final String service, final String ticket) {
-        this.service = service;
-        this.ticket = ticket;
+    public ServiceTicketResponse(@Nonnull final String service, @Nonnull final String ticket) {
+        this.service = Constraint.isNotNull(service, "Service cannot be null");
+        this.ticket = Constraint.isNotNull(ticket, "Ticket cannot be null");
     }
 
-    @Nonnull
-    public String getService() {
+    @Nonnull public String getService() {
         return service;
     }
 
-    @Nonnull
-    public String getTicket() {
+    @Nonnull public String getTicket() {
         return ticket;
     }
 

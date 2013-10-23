@@ -18,6 +18,8 @@ package net.shibboleth.idp.cas.protocol;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.utilities.java.support.logic.Constraint;
+
 /**
  * Describes a request for a ticket to access a service.
  *
@@ -35,7 +37,7 @@ public class ServiceTicketRequest {
 
 
     public ServiceTicketRequest(@Nonnull final String service) {
-        this.service = service;
+        this.service = Constraint.isNotNull(service, "Service cannot be null");
     }
 
     @Nonnull public String getService() {

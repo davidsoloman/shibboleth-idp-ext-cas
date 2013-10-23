@@ -41,7 +41,6 @@ public class CasProtocolTicketIdGeneratorTest {
         prefixGenerator.setPrefix("PT");
         final CasProtocolTicketIdGenerator suffixGenerator = new CasProtocolTicketIdGenerator();
         suffixGenerator.setSuffix("node1");
-        suffixGenerator.generate();
         final CasProtocolTicketIdGenerator longGenerator = new CasProtocolTicketIdGenerator();
         longGenerator.setLength(100);
         final CasProtocolTicketIdGenerator christmasTreeGenerator = new CasProtocolTicketIdGenerator();
@@ -49,11 +48,11 @@ public class CasProtocolTicketIdGeneratorTest {
         christmasTreeGenerator.setLength(23);
         christmasTreeGenerator.setSuffix("nodeZ");
         return new Object[][] {
-                new Object[] { defaultGenerator, "ST", 1, 20, null },
-                new Object[] { prefixGenerator, "PT", 1, 20, null },
-                new Object[] { suffixGenerator, "ST", 2, 20, "node1" },
-                new Object[] { longGenerator, "ST", 1, 100, null },
-                new Object[] { christmasTreeGenerator, "AA", 1, 23, "nodeZ" },
+                new Object[] { defaultGenerator, "ST", 20, null },
+                new Object[] { prefixGenerator, "PT", 20, null },
+                new Object[] { suffixGenerator, "ST", 20, "node1" },
+                new Object[] { longGenerator, "ST", 100, null },
+                new Object[] { christmasTreeGenerator, "AA", 23, "nodeZ" },
         };
     }
 
@@ -61,15 +60,15 @@ public class CasProtocolTicketIdGeneratorTest {
     public void testGenerate(
             final CasProtocolTicketIdGenerator generator,
             final String expectedPrefix,
-            final int expectedSequenceNumber,
             final int expectedRandomLength,
             final String expectedSuffix) throws Exception {
 
+        final long now = System.currentTimeMillis();
         final String id = generator.generate();
         final Matcher m = TICKET_REGEX.matcher(id);
         assertTrue(m.matches());
         assertEquals(m.group(1), expectedPrefix);
-        assertEquals(Integer.parseInt(m.group(2)), expectedSequenceNumber);
+        assertEquals(Long.parseLong(m.group(2)) / now, 1);
         assertEquals(m.group(3).length(), expectedRandomLength);
         if (expectedSuffix != null) {
             assertEquals(m.group(5), expectedSuffix);

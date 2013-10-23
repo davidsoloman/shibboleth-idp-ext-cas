@@ -18,7 +18,6 @@ package net.shibboleth.idp.cas.ticket;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,13 +61,9 @@ public class CasProtocolTicketIdGenerator implements TicketIdGenerator {
     /** Random source . */
     private final SecureRandom random;
 
-    /** Counter for sequential ticket part. */
-    private final AtomicInteger counter;
-
 
     /** Creates a new ticket generator instance. */
     public CasProtocolTicketIdGenerator() {
-        counter = new AtomicInteger(0);
         try {
             random = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
@@ -89,10 +84,9 @@ public class CasProtocolTicketIdGenerator implements TicketIdGenerator {
     }
 
     public String generate() {
-        final int n = counter.addAndGet(1);
         final StringBuilder builder = new StringBuilder(2 * length);
         builder.append(prefix).append('-');
-        builder.append(n).append('-');
+        builder.append(System.currentTimeMillis()).append('-');
         for (int i = 0; i < length; i++) {
             builder.append(ALLOWED_CHARS.charAt(random.nextInt(ALLOWED_CHARS.length())));
         }

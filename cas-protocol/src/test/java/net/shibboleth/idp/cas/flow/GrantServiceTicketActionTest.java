@@ -18,7 +18,7 @@ package net.shibboleth.idp.cas.flow;
 
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.cas.protocol.ServiceTicketResponse;
-import net.shibboleth.idp.cas.ticket.Ticket;
+import net.shibboleth.idp.cas.ticket.ServiceTicket;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,8 +57,11 @@ public class GrantServiceTicketActionTest extends AbstractTestNGSpringContextTes
 
     @DataProvider(name = "messages")
     public Object[][] provideMessages() {
+        final ServiceTicketRequest renewedRequest = new ServiceTicketRequest("https://www.example.com/beta");
+        renewedRequest.setRenew(true);
         return new Object[][] {
                 { new ServiceTicketRequest("https://www.example.com/alpha") },
+                { renewedRequest },
         };
     }
 
@@ -68,9 +71,11 @@ public class GrantServiceTicketActionTest extends AbstractTestNGSpringContextTes
         final Event result = grantServiceTicketAction.execute(context);
         assertEquals(result.getId(), Events.TicketCreated.id());
         final ServiceTicketResponse response = FlowStateSupport.getServiceTicketResponse(context);
-        final Ticket ticket = ticketService.removeTicket(response.getTicket());
+        final ServiceTicket ticket = ticketService.removeServiceTicket(response.getTicket());
         assertNotNull(ticket);
+        assertEquals(ticket.isRenew(), message.isRenew());
         assertEquals(ticket.getId(), response.getTicket());
+        assertEquals(ticket.getService(), response.getService());
     }
 
     private static RequestContext newTestRequestContext(final ServiceTicketRequest message) {

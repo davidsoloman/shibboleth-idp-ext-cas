@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.cas.protocol.ServiceTicketResponse;
+import net.shibboleth.idp.cas.ticket.ServiceTicket;
 import net.shibboleth.idp.cas.ticket.Ticket;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.utilities.java.support.logic.Constraint;
@@ -51,10 +52,10 @@ public class GrantServiceTicketAction implements Action {
     @Override
     public Event execute(final RequestContext context) throws Exception {
         final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(context);
-        final Ticket ticket;
+        final ServiceTicket ticket;
         try {
             log.debug("Creating ticket for ", request.getService());
-            ticket = ticketService.createTicket(request.getService());
+            ticket = ticketService.createServiceTicket(request.getService(), request.isRenew());
             FlowStateSupport.setServiceTicketResponse(
                     context, new ServiceTicketResponse(request.getService(), ticket.getId()));
             return new Event(this, Events.TicketCreated.id());

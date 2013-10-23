@@ -31,10 +31,6 @@ import org.opensaml.storage.annotation.Expiration;
  *
  * @author Marvin S. Addison
  */
-@Context("CONTEXT")
-@Key("id")
-@Value("service")
-@Expiration("expirationInstant")
 public class Ticket {
     /** Storage service context name. */
     public static final String CONTEXT = "http://jasig.org/cas/tickets";

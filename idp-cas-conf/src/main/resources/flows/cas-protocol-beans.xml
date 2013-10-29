@@ -18,32 +18,70 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd"
        default-init-method="initialize">
 
-  <!-- Adapt ProfileAction beans to Webflow Actions. -->
-  <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+    <!-- Adapt ProfileAction beans to Webflow Actions. -->
+    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
 
-  <bean id="cas.ticketIdGenerator"
-        class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator" />
+    <bean id="cas.serviceTicketIdGenerator"
+          class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator"
+          p:prefix="ST"
+          p:length="25" />
 
-  <bean id="cas.ticketService" class="net.shibboleth.idp.cas.ticket.SimpleTicketService"
-        p:storageService-ref="shibboleth.StorageService"
-        p:ticketIdGenerator-ref="cas.ticketIdGenerator"
-        p:ticketValidityPeriod="PT10S"/>
+    <bean id="cas.proxyGrantingTicketIdGenerator"
+          class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator"
+          p:prefix="PGT"
+          p:length="50" />
 
-  <!-- Action beans -->
-  <bean id="initProfileRequestContext"
-        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" />
+    <bean id="cas.proxyGrantingTicketIOUGenerator"
+          class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator"
+          p:prefix="PGT"
+          p:length="50" />
 
-  <bean id="checkAuthenticationRequiredAction"
-        class="net.shibboleth.idp.cas.flow.CheckAuthenticationRequiredAction" />
+    <bean id="cas.proxyTicketIdGenerator"
+          class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator"
+          p:prefix="PT"
+          p:length="25" />
 
-  <bean id="grantServiceTicketAction"
-        class="net.shibboleth.idp.cas.flow.GrantServiceTicketAction"
-        p:ticketService-ref="cas.ticketService" />
+    <bean id="cas.ticketService" class="net.shibboleth.idp.cas.ticket.SimpleTicketService"
+          p:storageService-ref="shibboleth.StorageService"
+          p:serviceTicketIdGenerator-ref="cas.serviceTicketIdGenerator"
+          p:proxyTicketIdGenerator-ref="cas.proxyTicketIdGenerator"
+          p:serviceTicketValidityPeriod="PT20S"
+          p:proxyGrantingTicketValidityPeriod="PT20S"
+          p:proxyTicketValidityPeriod="PT20S" />
+
+    <bean id="cas.proxyAuthenticator" class="net.shibboleth.idp.cas.authn.PkixProxyAuthenticator"
+          c:pgtIdGenerator-ref="cas.proxyGrantingTicketIdGenerator"
+          c:pgtIouGenerator-ref="cas.proxyGrantingTicketIOUGenerator"
+          c:trustStore-ref="cas.proxyCallbackTrustStore"
+          c:hostnameVerifier-ref="cas.proxyHostnameVerifier" />
+
+    <!-- Action beans -->
+    <bean id="initProfileRequestContext"
+          class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" />
+
+    <bean id="initializeLoginAction"
+          class="net.shibboleth.idp.cas.flow.InitializeLoginAction" />
+
+    <bean id="checkAuthenticationRequiredAction"
+          class="net.shibboleth.idp.cas.flow.CheckAuthenticationRequiredAction" />
+
+    <bean id="grantServiceTicketAction"
+          class="net.shibboleth.idp.cas.flow.GrantServiceTicketAction"
+          p:ticketService-ref="cas.ticketService" />
+
+    <bean id="initializeValidateAction"
+          class="net.shibboleth.idp.cas.flow.InitializeValidateAction" />
+
+    <bean id="validateServiceTicketAction"
+          class="net.shibboleth.idp.cas.flow.ValidateServiceTicketAction"
+          p:ticketService-ref="cas.ticketService"
+          p:proxyAuthenticator-ref="cas.proxyAuthenticator" />
 
 </beans>

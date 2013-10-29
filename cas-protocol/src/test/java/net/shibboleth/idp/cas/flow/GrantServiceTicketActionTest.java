@@ -20,6 +20,9 @@ import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.cas.protocol.ServiceTicketResponse;
 import net.shibboleth.idp.cas.ticket.ServiceTicket;
 import net.shibboleth.idp.cas.ticket.TicketService;
+import net.shibboleth.idp.session.IdPSession;
+import net.shibboleth.idp.session.context.SessionContext;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -33,6 +36,7 @@ import org.springframework.webflow.test.MockRequestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -43,6 +47,7 @@ import static org.testng.Assert.assertNotNull;
  */
 @ContextConfiguration({
         "/conf/global-beans.xml",
+        "/conf/test-beans.xml",
         "/flows/cas-protocol-beans.xml"
 })
 public class GrantServiceTicketActionTest extends AbstractTestNGSpringContextTests {
@@ -69,7 +74,7 @@ public class GrantServiceTicketActionTest extends AbstractTestNGSpringContextTes
     public void testExecute(final ServiceTicketRequest message) throws Exception {
         final RequestContext context = newTestRequestContext(message);
         final Event result = grantServiceTicketAction.execute(context);
-        assertEquals(result.getId(), Events.TicketCreated.id());
+        assertEquals(result.getId(), Events.Success.id());
         final ServiceTicketResponse response = FlowStateSupport.getServiceTicketResponse(context);
         final ServiceTicket ticket = ticketService.removeServiceTicket(response.getTicket());
         assertNotNull(ticket);
@@ -84,6 +89,13 @@ public class GrantServiceTicketActionTest extends AbstractTestNGSpringContextTes
         externalContext.setNativeRequest(new MockHttpServletRequest());
         externalContext.setNativeResponse(new MockHttpServletResponse());
         requestContext.setExternalContext(externalContext);
+        final ProfileRequestContext profileRequestContext = new ProfileRequestContext();
+        requestContext.getConversationScope().put(ProfileRequestContext.BINDING_KEY, profileRequestContext);
+        final IdPSession mockSession = mock(IdPSession.class);
+        when(mockSession.getId()).thenReturn("ABC1234567890");
+        final SessionContext sessionContext = new SessionContext();
+        sessionContext.setIdPSession(mockSession);
+        profileRequestContext.addSubcontext(sessionContext);
         FlowStateSupport.setServiceTicketRequest(requestContext, message);
         return requestContext;
     }

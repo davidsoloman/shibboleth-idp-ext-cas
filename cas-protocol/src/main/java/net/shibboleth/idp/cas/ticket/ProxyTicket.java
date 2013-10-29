@@ -2,17 +2,18 @@ package net.shibboleth.idp.cas.ticket;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.joda.time.Instant;
 
 /**
- * CAS service ticket.
+ * CAS proxy ticket.
  *
  * @author Marvin S. Addison
  */
-public class ServiceTicket extends Ticket {
+public class ProxyTicket extends ServiceTicket {
 
-    /** Forced authentication flag. */
-    private final boolean renew;
+    /** Proxy-granting ticket used to create ticket. */
+    @Nonnull private final String pgtId;
 
     /**
      * Creates a new authenticated ticket with an identifier, service, and expiration date.
@@ -22,19 +23,20 @@ public class ServiceTicket extends Ticket {
      * @param service Service that requested the ticket.
      * @param expiration Expiration instant.
      * @param renew True if ticket was issued from forced authentication, false otherwise.
+     * @param pgtId Proxy-granting ticket ID used to create ticket.
      */
-    public ServiceTicket(
+    public ProxyTicket(
             @Nonnull final String id,
             @Nonnull final String sessionId,
             @Nonnull final String service,
             @Nonnull final Instant expiration,
-            final boolean renew) {
-        super(id, sessionId, service, expiration);
-        this.renew = renew;
+            final boolean renew,
+            @Nonnull final String pgtId) {
+        super(id, sessionId, service, expiration, renew);
+        this.pgtId = Constraint.isNotNull(pgtId, "PgtId cannot be null");
     }
 
-
-    public boolean isRenew() {
-        return renew;
+    @Nonnull public String getPgtId() {
+        return pgtId;
     }
 }

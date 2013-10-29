@@ -23,9 +23,9 @@ public enum ProtocolUri {
 
 
     /**
-     * Converts enumeration name to an identifier suitable for a Spring Webflow event identifier.
+     * Converts enumeration name to lower-case name as used by CAS protocol document.
      *
-     * @return Events enumeration name with first letter lower-cased.
+     * @return Enumeration name with first letter lower-cased.
      */
     public String id() {
         return this.name().substring(0, 1).toLowerCase() + this.name().substring(1);

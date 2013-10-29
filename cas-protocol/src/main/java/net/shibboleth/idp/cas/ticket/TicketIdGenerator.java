@@ -16,6 +16,8 @@
  */
 package net.shibboleth.idp.cas.ticket;
 
+import javax.annotation.Nonnull;
+
 /**
  * Strategy for ticket generation.
  *
@@ -28,5 +30,5 @@ public interface TicketIdGenerator {
      *
      * @return Ticket identifier.
      */
-    String generate();
+    @Nonnull String generate();
 }

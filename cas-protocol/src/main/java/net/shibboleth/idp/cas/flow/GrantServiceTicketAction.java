@@ -21,22 +21,25 @@ import javax.annotation.Nonnull;
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.cas.protocol.ServiceTicketResponse;
 import net.shibboleth.idp.cas.ticket.ServiceTicket;
-import net.shibboleth.idp.cas.ticket.Ticket;
 import net.shibboleth.idp.cas.ticket.TicketService;
+import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import org.opensaml.profile.ProfileException;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.webflow.execution.Action;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 
 /**
- * Generates and stores a CAS protocol ticket and generates a {@link ServiceTicketResponse} message stored
+ * Generates and stores a CAS protocol ticket. Possible outcomes are are {@link Events#Success success} and
+ * {@link Events#Failure failure}. In the success case a {@link ServiceTicketResponse} message is created and stored
  * as request scope parameter under the key {@value FlowStateSupport#SERVICE_TICKET_RESPONSE_KEY}.
  *
  * @author Marvin S. Addison
  */
-public class GrantServiceTicketAction implements Action {
+public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicketRequest, ServiceTicketRequest> {
 
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(GrantServiceTicketAction.class);
@@ -49,18 +52,29 @@ public class GrantServiceTicketAction implements Action {
         this.ticketService = Constraint.isNotNull(ticketService, "Ticket service cannot be null.");
     }
 
+    /** {@inheritDoc} */
+    @Nonnull
     @Override
-    public Event execute(final RequestContext context) throws Exception {
-        final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(context);
+    protected Event doExecute(
+            final @Nonnull RequestContext springRequestContext,
+            final @Nonnull ProfileRequestContext<ServiceTicketRequest, ServiceTicketRequest> profileRequestContext)
+            throws ProfileException {
+
+        final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(springRequestContext);
+        final SessionContext sessionCtx = profileRequestContext.getSubcontext(SessionContext.class, false);
+        if (sessionCtx == null || sessionCtx.getIdPSession() == null) {
+            throw new IllegalStateException("Cannot locate IdP session");
+        }
         final ServiceTicket ticket;
         try {
             log.debug("Creating ticket for ", request.getService());
-            ticket = ticketService.createServiceTicket(request.getService(), request.isRenew());
+            ticket = ticketService.createServiceTicket(
+                    sessionCtx.getIdPSession().getId(), request.getService(), request.isRenew());
             FlowStateSupport.setServiceTicketResponse(
-                    context, new ServiceTicketResponse(request.getService(), ticket.getId()));
-            return new Event(this, Events.TicketCreated.id());
+                    springRequestContext, new ServiceTicketResponse(request.getService(), ticket.getId()));
+            return new Event(this, Events.Success.id());
         } catch (RuntimeException e) {
-            return new Event(this, Events.TicketCreationFailed.id());
+            return new Event(this, Events.Failure.id());
         }
     }
 }

@@ -24,9 +24,6 @@ package net.shibboleth.idp.cas.flow;
  */
 public enum Events {
 
-    /** CAS protocol violation. */
-    ProtocolViolation,
-
     /** IdP SSO session not found. */
     SessionNotFound,
 
@@ -39,12 +36,14 @@ public enum Events {
     /** CAS protocol gateway flag specified to skip authentication. */
     GatewayRequested,
 
-    /** Service ticket created for service access request. */
-    TicketCreated,
+    /** Generic success event. */
+    Success,
 
-    /** Ticket creation failed due to an error. */
-    TicketCreationFailed;
+    /** Generic failure event. */
+    Failure,
 
+    /** Protocol URI not recognized. */
+    UnknownProtocolUri;
 
     /**
      * Converts enumeration name to an identifier suitable for a Spring Webflow event identifier.

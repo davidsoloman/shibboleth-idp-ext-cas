@@ -29,8 +29,8 @@ public class DispatchProtocolActionTest {
                 { "/idp/cas/validate", "validate" },
                 { "/idp/cas/proxy", "proxy" },
                 { "/idp/cas/proxyValidate", "proxyValidate" },
-                { "/idp/cas/unknown", "protocolViolation" },
-                { "/idp/cas/login/unknown", "protocolViolation" },
+                { "/idp/cas/unknown", "unknownProtocolUri" },
+                { "/idp/cas/login/unknown", "unknownProtocolUri" },
         };
     }
 

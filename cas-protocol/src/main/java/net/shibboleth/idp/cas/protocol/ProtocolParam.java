@@ -19,11 +19,17 @@ public enum ProtocolParam {
     /** Gateway authentication flag. */
     Gateway,
 
-    /** Proxy-granting ticket callback URL. */
-    PgtUrl,
-
     /** Proxy-granting ticket. */
     Pgt,
+
+    /** Proxy-granting ticket identifier sent to proxy callback URL. */
+    PgtId,
+
+    /** Proxy-granting ticket IOU identifier. */
+    PgtIou,
+
+    /** Proxy-granting ticket callback URL. */
+    PgtUrl,
 
     /** Target service for proxy-granting ticket. */
     TargetService;
@@ -32,7 +38,7 @@ public enum ProtocolParam {
     /**
      * Converts enumeration name to lower-case name as used by CAS protocol document.
      *
-     * @return Events enumeration name with first letter lower-cased.
+     * @return Enumeration name with first letter lower-cased.
      */
     public String id() {
         return this.name().substring(0, 1).toLowerCase() + this.name().substring(1);

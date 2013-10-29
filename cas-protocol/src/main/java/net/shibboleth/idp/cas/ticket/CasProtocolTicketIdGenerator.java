@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
  * [PREFIX]-[SEQUENCE_PART]-[RANDOM_PART]-[SUFFIX],
  * </pre>
  *
- * where suffix is optional.
+ * where suffix is optional. By default tickets have at least 128 bits of entropy in the random part of the identifier.
  *
  * @author Marvin S. Addison
  */
@@ -44,7 +44,7 @@ public class CasProtocolTicketIdGenerator implements TicketIdGenerator {
     private static final String DEFAULT_PREFIX = "ST";
 
     /** Default number of characters in the random part of a generated ticket, {@value}. */
-    private static final int DEFAULT_LENGTH = 20;
+    private static final int DEFAULT_LENGTH = 25;
 
     /** Allowed characters in random part of ticket identifier. */
     private static final String ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345679";
@@ -83,7 +83,7 @@ public class CasProtocolTicketIdGenerator implements TicketIdGenerator {
         this.suffix = StringSupport.trimOrNull(suffix);
     }
 
-    public String generate() {
+    @Nonnull public String generate() {
         final StringBuilder builder = new StringBuilder(2 * length);
         builder.append(prefix).append('-');
         builder.append(System.currentTimeMillis()).append('-');

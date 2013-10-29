@@ -16,8 +16,6 @@
  */
 package net.shibboleth.idp.cas.flow;
 
-import java.lang.reflect.Type;
-
 import javax.annotation.Nonnull;
 
 import com.google.common.base.Function;
@@ -35,7 +33,14 @@ import org.springframework.webflow.execution.RequestContext;
 
 /**
  * Determines whether authentication is required by examining both SSO session state and CAS
- * service ticket request message.
+ * service ticket request message. Returns one of the following events:
+ *
+ * <ul>
+ *     <li>{@link Events#GatewayRequested gatewayRequested} - Authentication not required since no ticket is requested.</li>
+ *     <li>{@link Events#RenewRequested renewRequested} - Authentication required regardless of existing session.</li>
+ *     <li>{@link Events#SessionFound sessionFound} - Authentication not required since session already exists.</li>
+ *     <li>{@link Events#SessionNotFound sessionNotFound} - Authentication required since no session exists.</li>
+ * </ul>
  *
  * @author Marvin S. Addison
  */
@@ -43,10 +48,6 @@ public class CheckAuthenticationRequiredAction extends AbstractProfileAction<Ser
 
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(CheckAuthenticationRequiredAction.class);
-
-    /** Strategy used to look up the current IdP session context if one exists. */
-    private Function<ProfileRequestContext, SessionContext> sessionCtxLookupStrategy =
-            new ChildContextLookup<>(SessionContext.class, false);
 
     /** {@inheritDoc} */
     @Nonnull
@@ -56,12 +57,12 @@ public class CheckAuthenticationRequiredAction extends AbstractProfileAction<Ser
             final @Nonnull ProfileRequestContext<ServiceTicketRequest, Object> profileRequestContext)
             throws ProfileException {
 
-        final ServiceTicketRequest request = profileRequestContext.getInboundMessageContext().getMessage();
+        final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(springRequestContext);
         if (request.isGateway()) {
             return new Event(this, Events.GatewayRequested.id());
         }
 
-        final SessionContext sessionCtx = sessionCtxLookupStrategy.apply(profileRequestContext);
+        final SessionContext sessionCtx = profileRequestContext.getSubcontext(SessionContext.class, false);
         final Events result;
         if (sessionCtx != null) {
             final IdPSession session = sessionCtx.getIdPSession();

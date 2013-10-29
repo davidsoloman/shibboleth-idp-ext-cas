@@ -5,10 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import net.shibboleth.idp.cas.protocol.ProtocolUri;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
-import org.opensaml.profile.ProfileException;
-import org.opensaml.profile.action.AbstractProfileAction;
-import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.webflow.execution.Action;
@@ -20,11 +16,12 @@ import org.springframework.webflow.execution.RequestContext;
  * The events emitted by this action correspond to the CAS protocol URIs:
  *
  * <ol>
- *     <li><code>login</code></li>
- *     <li><code>validate</code></li>
- *     <li><code>serviceValidate</code></li>
- *     <li><code>proxy</code></li>
- *     <li><code>proxyValidate</code></li>
+ *     <li>{@link ProtocolUri#Login login}</li>
+ *     <li>{@link ProtocolUri#Validate validate}</li>
+ *     <li>{@link ProtocolUri#ServiceValidate serviceValidate}</li>
+ *     <li>{@link ProtocolUri#Proxy proxy}</li>
+ *     <li>{@link ProtocolUri#ProxyValidate proxyValidate}</li>
+ *     <li>{@link Events#UnknownProtocolUri unknownProtocolUri} - Requested protocol URI not recognized.</li>
  * </ol>
  *
  * @author Marvin S. Addison
@@ -37,7 +34,7 @@ public class DispatchProtocolAction implements Action {
     public Event execute(@Nonnull RequestContext context) throws Exception {
         final ProtocolUri uri = determineUri(context);
         if (uri == null) {
-            return new Event(this, Events.ProtocolViolation.id());
+            return new Event(this, Events.UnknownProtocolUri.id());
         }
         log.debug("Dispatching to {}", uri.id());
         return new Event(this, uri.id());

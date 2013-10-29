@@ -1,66 +1,84 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>net.shibboleth.idp</groupId>
-    <artifactId>shibboleth-idp-ext-cas</artifactId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>net.shibboleth.idp</groupId>
+        <artifactId>shibboleth-idp-ext-cas</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>cas-protocol</artifactId>
-  <packaging>jar</packaging>
+    <artifactId>cas-protocol</artifactId>
+    <packaging>jar</packaging>
 
-  <name>CAS Protocol Extension Module</name>
+    <name>CAS Protocol Extension Module</name>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-  <dependencies>
-    <!-- Compile dependencies -->
-    <dependency>
-      <groupId>net.shibboleth.idp</groupId>
-      <artifactId>idp-profile-api</artifactId>
-      <version>${shib.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>net.shibboleth.idp</groupId>
-      <artifactId>idp-profile-impl</artifactId>
-      <version>${shib.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>net.shibboleth.idp</groupId>
-      <artifactId>idp-session-api</artifactId>
-      <version>${shib.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opensaml</groupId>
-      <artifactId>opensaml-storage-api</artifactId>
-      <version>${opensaml.version}</version>
-    </dependency>
+    <dependencies>
+        <!-- Compile dependencies -->
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-profile-api</artifactId>
+            <version>${shib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-profile-impl</artifactId>
+            <version>${shib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-session-api</artifactId>
+            <version>${shib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-storage-api</artifactId>
+            <version>${opensaml.version}</version>
+        </dependency>
 
-    <!-- Runtime dependencies -->
-    <dependency>
-      <groupId>net.shibboleth.ext</groupId>
-      <artifactId>spring-extensions</artifactId>
-      <version>1.1-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
+        <!-- Runtime dependencies -->
+        <dependency>
+            <groupId>net.shibboleth.ext</groupId>
+            <artifactId>spring-extensions</artifactId>
+            <version>1.1-SNAPSHOT</version>
+            <scope>runtime</scope>
+        </dependency>
 
-    <!-- Provided dependencies -->
+        <!-- Provided dependencies -->
 
-    <!-- Test dependencies -->
-    <dependency>
-      <groupId>net.shibboleth.idp</groupId>
-      <artifactId>idp-cas-conf</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${spring.version}</version>
-      <scope>test</scope>
-    </dependency>
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-cas-conf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.0.6.v20130930</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-plus</artifactId>
+            <version>9.0.6.v20130930</version>
+            <scope>test</scope>
+        </dependency>
   </dependencies>
 </project>

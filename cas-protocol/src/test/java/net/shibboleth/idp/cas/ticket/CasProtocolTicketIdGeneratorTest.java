@@ -48,9 +48,9 @@ public class CasProtocolTicketIdGeneratorTest {
         christmasTreeGenerator.setLength(23);
         christmasTreeGenerator.setSuffix("nodeZ");
         return new Object[][] {
-                new Object[] { defaultGenerator, "ST", 20, null },
-                new Object[] { prefixGenerator, "PT", 20, null },
-                new Object[] { suffixGenerator, "ST", 20, "node1" },
+                new Object[] { defaultGenerator, "ST", 25, null },
+                new Object[] { prefixGenerator, "PT", 25, null },
+                new Object[] { suffixGenerator, "ST", 25, "node1" },
                 new Object[] { longGenerator, "ST", 100, null },
                 new Object[] { christmasTreeGenerator, "AA", 23, "nodeZ" },
         };

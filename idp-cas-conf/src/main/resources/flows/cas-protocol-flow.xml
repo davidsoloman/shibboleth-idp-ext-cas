@@ -19,49 +19,65 @@
 <flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
 
-  <on-start>
-    <evaluate expression="initProfileRequestContext"/>
-  </on-start>
+    <on-start>
+        <evaluate expression="initProfileRequestContext"/>
+    </on-start>
 
-  <action-state id="dispatchProtocol">
-    <evaluate expression="dispatchProtocolAction" />
-    <transition on="login" to="initializeLogin"/>
-    <transition on="validate" to="initializeValidate"/>
-    <transition on="serviceValidate" to="initializeValidate"/>
-    <transition on="proxy" to="initializeProxy"/>
-    <transition on="proxyValidate" to="initializeProxyValidate"/>
-  </action-state>
+    <action-state id="dispatchProtocol">
+        <evaluate expression="dispatchProtocolAction" />
+        <transition on="login" to="initializeLogin"/>
+        <transition on="validate" to="initializeValidate"/>
+        <transition on="serviceValidate" to="initializeValidate"/>
+        <transition on="proxy" to="initializeProxy"/>
+        <transition on="proxyValidate" to="initializeValidate"/>
+    </action-state>
 
-  <action-state id="initializeLogin">
-    <evaluate expression="initializeLoginAction" />
-    <transition on="proceed" to="checkAuthenticationRequired" />
-  </action-state>
+    <action-state id="initializeLogin">
+        <evaluate expression="initializeLoginAction" />
+        <transition on="proceed" to="checkAuthenticationRequired" />
+    </action-state>
 
-  <action-state id="checkAuthenticationRequired">
-    <evaluate expression="checkAuthenticationRequiredAction"/>
-    <transition on="sessionNotFound" to="authenticate" />
-    <transition on="sessionFound" to="generateTicket" />
-    <transition on="renewRequested" to="authenticate" />
-    <transition on="gatewayRequested" to="gatewayRedirect" />
-  </action-state>
+    <action-state id="checkAuthenticationRequired">
+        <evaluate expression="checkAuthenticationRequiredAction"/>
+        <transition on="sessionNotFound" to="authenticate" />
+        <transition on="sessionFound" to="generateTicket" />
+        <transition on="renewRequested" to="authenticate" />
+        <transition on="gatewayRequested" to="gatewayRedirect" />
+    </action-state>
 
-  <subflow-state id="authenticate" subflow="Authenticate">
-    <transition on="proceed" to="grantServiceTicket" />
-  </subflow-state>
+    <subflow-state id="authenticate" subflow="Authenticate">
+        <transition on="proceed" to="grantServiceTicket" />
+    </subflow-state>
 
-  <action-state id="grantServiceTicket">
-    <evaluate expression="grantServiceTicketAction" />
-    <transition on="ticketCreated" to="redirectToService" />
-    <transition on="ticketCreationFailed" to="error" />
-  </action-state>
+    <action-state id="grantServiceTicket">
+        <evaluate expression="grantServiceTicketAction" />
+        <transition on="ticketCreated" to="redirectToService" />
+        <transition on="ticketCreationFailed" to="error" />
+    </action-state>
 
-  <end-state id="redirectToService" view="externalRedirect:${requestScope.serviceTicketResponse.redirectUrl}" />
+    <action-state id="validateServiceTicket">
+        <evaluate expression="validateServiceTicketAction" />
+        <transition on="serviceMismatch" to="serviceValidateFailure" />
+        <transition on="sessionExpired" to="serviceValidateFailure" />
+        <transition on="sessionMismatch" to="serviceValidateFailure" />
+        <transition on="ticketExpired" to="serviceValidateFailure" />
+        <transition on="ticketNotFromRenew" to="serviceValidateFailure" />
+        <transition on="ticketRetrievalError" to="serviceValidateFailure" />
+        <transition on="success" to="serviceValidateSuccess" />
+    </action-state>
 
-  <end-state id="gatewayRedirect" view="externalRedirect:${requestScope.serviceTicketRequest.service}" />
+    <!-- Redirect end states -->
+    <end-state id="redirectToService" view="externalRedirect:${requestScope.serviceTicketResponse.redirectUrl}" />
+    <end-state id="gatewayRedirect" view="externalRedirect:${requestScope.serviceTicketRequest.service}" />
 
-  <end-state id="error" view="profileErrorView" />
-  <end-state id="protocolViolation" view="profileErrorView" />
+    <!-- View end states -->
+    <end-state id="serviceValidateFailure" view="serviceValidateFailure" />
+    <end-state id="serviceValidateSuccess" view="serviceValidateSuccess" />
 
-  <bean-import resource="cas-protocol-beans.xml" />
+    <!-- Error end states -->
+    <end-state id="error" view="profileErrorView" />
+    <end-state id="protocolViolation" view="profileErrorView" />
+
+    <bean-import resource="cas-protocol-beans.xml" />
 
 </flow>

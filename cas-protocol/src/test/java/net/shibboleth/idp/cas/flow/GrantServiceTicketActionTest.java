@@ -20,23 +20,12 @@ import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.cas.protocol.ServiceTicketResponse;
 import net.shibboleth.idp.cas.ticket.ServiceTicket;
 import net.shibboleth.idp.cas.ticket.TicketService;
-import net.shibboleth.idp.session.IdPSession;
-import net.shibboleth.idp.session.context.SessionContext;
-import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-import org.springframework.webflow.test.MockExternalContext;
-import org.springframework.webflow.test.MockRequestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -45,20 +34,13 @@ import static org.testng.Assert.assertNotNull;
  *
  * @author Marvin S. Addison
  */
-@ContextConfiguration({
-        "/conf/global-beans.xml",
-        "/conf/test-beans.xml",
-        "/flows/cas-protocol-beans.xml"
-})
-public class GrantServiceTicketActionTest extends AbstractTestNGSpringContextTests {
+public class GrantServiceTicketActionTest extends AbstractProfileActionTest<GrantServiceTicketAction> {
 
     @Autowired
-    @Qualifier("grantServiceTicketAction")
-    private GrantServiceTicketAction grantServiceTicketAction;
+    private GrantServiceTicketAction action;
 
     @Autowired
     private TicketService ticketService;
-
 
     @DataProvider(name = "messages")
     public Object[][] provideMessages() {
@@ -72,8 +54,9 @@ public class GrantServiceTicketActionTest extends AbstractTestNGSpringContextTes
 
     @Test(dataProvider = "messages")
     public void testExecute(final ServiceTicketRequest message) throws Exception {
-        final RequestContext context = newTestRequestContext(message);
-        final Event result = grantServiceTicketAction.execute(context);
+        final RequestContext context = createSessionContext("1234567890");
+        FlowStateSupport.setServiceTicketRequest(context, message);
+        final Event result = action.execute(context);
         assertEquals(result.getId(), Events.Success.id());
         final ServiceTicketResponse response = FlowStateSupport.getServiceTicketResponse(context);
         final ServiceTicket ticket = ticketService.removeServiceTicket(response.getTicket());
@@ -81,22 +64,5 @@ public class GrantServiceTicketActionTest extends AbstractTestNGSpringContextTes
         assertEquals(ticket.isRenew(), message.isRenew());
         assertEquals(ticket.getId(), response.getTicket());
         assertEquals(ticket.getService(), response.getService());
-    }
-
-    private static RequestContext newTestRequestContext(final ServiceTicketRequest message) {
-        final MockRequestContext requestContext = new MockRequestContext();
-        final MockExternalContext externalContext = new MockExternalContext();
-        externalContext.setNativeRequest(new MockHttpServletRequest());
-        externalContext.setNativeResponse(new MockHttpServletResponse());
-        requestContext.setExternalContext(externalContext);
-        final ProfileRequestContext profileRequestContext = new ProfileRequestContext();
-        requestContext.getConversationScope().put(ProfileRequestContext.BINDING_KEY, profileRequestContext);
-        final IdPSession mockSession = mock(IdPSession.class);
-        when(mockSession.getId()).thenReturn("ABC1234567890");
-        final SessionContext sessionContext = new SessionContext();
-        sessionContext.setIdPSession(mockSession);
-        profileRequestContext.addSubcontext(sessionContext);
-        FlowStateSupport.setServiceTicketRequest(requestContext, message);
-        return requestContext;
     }
 }

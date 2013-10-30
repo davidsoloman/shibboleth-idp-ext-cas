@@ -38,6 +38,6 @@ public class ProxyGrantingTicketSerializer extends AbstractTicketSerializer<Prox
                 fields[0],
                 fields[1],
                 new Instant(Long.valueOf(fields[2])),
-                fields.length > 2 ? fields[3] : null);
+                fields.length > 3 ? fields[3] : null);
     }
 }

@@ -1,0 +1,112 @@
+package net.shibboleth.idp.cas.flow;
+
+import net.shibboleth.idp.cas.protocol.ProtocolError;
+import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
+import net.shibboleth.idp.cas.ticket.ServiceTicket;
+import net.shibboleth.idp.cas.ticket.TicketService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.webflow.execution.RequestContext;
+import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertEquals;
+
+/**
+ * Unit test for {@link ValidateServiceTicketAction} class.
+ *
+ * @author Marvin S. Addison
+ */
+public class ValidateServiceTicketActionTest extends AbstractProfileActionTest<ValidateServiceTicketAction> {
+
+    private static final String TEST_SESSION_ID = "+TkSGIRofZyue/p8F4M7TA==";
+
+    private static final String TEST_SERVICE = "https://example.com/widget";
+
+    @Autowired
+    private ValidateServiceTicketAction action;
+
+    @Autowired
+    private TicketService ticketService;
+
+    @Test
+    public void testServiceMismatch() throws Exception {
+        final RequestContext context = createSessionContext(TEST_SESSION_ID);
+        final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, false);
+        final TicketValidationRequest request = new TicketValidationRequest("mismatch", ticket.getId());
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), ProtocolError.ServiceMismatch.id());
+    }
+
+    @Test
+    public void testSessionExpired() throws Exception {
+        final RequestContext context = createSessionContext(TEST_SESSION_ID, false);
+        final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, false);
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), ProtocolError.SessionExpired.id());
+    }
+
+    @Test
+    public void testSessionMismatch() throws Exception {
+        final RequestContext context = createSessionContext(TEST_SESSION_ID);
+        final ServiceTicket ticket = ticketService.createServiceTicket("mismatch", TEST_SERVICE, false);
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), ProtocolError.SessionMismatch.id());
+    }
+
+    @Test
+    public void testTicketExpired() throws Exception {
+        final RequestContext context = createSessionContext(TEST_SESSION_ID);
+        final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, false);
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        // Remove the ticket prior to validation to simulate expiration
+        ticketService.removeServiceTicket(ticket.getId());
+        assertEquals(action.execute(context).getId(), ProtocolError.TicketExpired.id());
+    }
+
+    @Test
+    public void testTicketNotFromRenew() throws Exception {
+        final RequestContext context = createSessionContext(TEST_SESSION_ID);
+        final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, true);
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), ProtocolError.TicketNotFromRenew.id());
+    }
+
+    @Test
+    public void testTicketRetrievalError() throws Exception {
+        final RequestContext context = createSessionContext(TEST_SESSION_ID);
+        final TicketService throwingTicketService = mock(TicketService.class);
+        when(throwingTicketService.removeServiceTicket(any(String.class))).thenThrow(new RuntimeException("Broken"));
+        action.setTicketService(throwingTicketService);
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, "ST-12345");
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), ProtocolError.TicketRetrievalError.id());
+    }
+
+    @Test
+    public void testSuccess() throws Exception {
+        final RequestContext context = createSessionContext(TEST_SESSION_ID);
+        final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, false);
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), Events.Success.id());
+        assertNotNull(FlowStateSupport.getServiceTicketValidationResponse(context));
+        assertEquals(FlowStateSupport.getServiceTicketValidationResponse(context).getUsername(), TEST_PRINCIPAL_NAME);
+    }
+
+    @Test
+    public void testSuccessWithRenew() throws Exception {
+        final RequestContext context = createSessionContext(TEST_SESSION_ID);
+        final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, true);
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
+        request.setRenew(true);
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), Events.Success.id());
+        assertNotNull(FlowStateSupport.getServiceTicketValidationResponse(context));
+        assertEquals(FlowStateSupport.getServiceTicketValidationResponse(context).getUsername(), TEST_PRINCIPAL_NAME);
+    }
+}

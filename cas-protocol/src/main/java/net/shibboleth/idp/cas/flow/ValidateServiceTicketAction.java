@@ -94,7 +94,7 @@ public class ValidateServiceTicketAction
         if (ticket == null || ticket.getExpirationInstant().isBeforeNow()) {
             return ProtocolError.TicketExpired.event(this);
         }
-        if (!ticket.getId().equals(session.getId())) {
+        if (!ticket.getSessionId().equals(session.getId())) {
             return ProtocolError.SessionMismatch.event(this);
         }
         if (!ticket.getService().equalsIgnoreCase(request.getService())) {

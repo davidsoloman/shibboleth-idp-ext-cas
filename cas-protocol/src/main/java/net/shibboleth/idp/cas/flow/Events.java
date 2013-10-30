@@ -24,10 +24,10 @@ package net.shibboleth.idp.cas.flow;
  */
 public enum Events {
 
-    /** IdP SSO session not found. */
+    /** Active IdP session not found. */
     SessionNotFound,
 
-    /** IdP SSO session found. */
+    /** Active IdP session found. */
     SessionFound,
 
     /** CAS protocol renew flag specified to force authentication. */

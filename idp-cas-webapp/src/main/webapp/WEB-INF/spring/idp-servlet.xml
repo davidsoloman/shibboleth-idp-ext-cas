@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:webflow="http://www.springframework.org/schema/webflow-config"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/webflow-config classpath:/org/springframework/webflow/config/spring-webflow-config-2.3.xsd">
+
+    <bean class="org.springframework.webflow.mvc.servlet.FlowHandlerMapping"
+          p:flowRegistry-ref="flowRegistry" />
+
+    <bean class="org.springframework.webflow.mvc.servlet.FlowHandlerAdapter"
+          p:flowExecutor-ref="flowExecutor" />
+
+    <webflow:flow-registry id="flowRegistry" flow-builder-services="flowBuilderServices">
+
+        <webflow:flow-location id="Authentication.Abstract" path="/WEB-INF/flows/authn-abstract-flow.xml" />
+        <webflow:flow-location id="Authentication" path="/WEB-INF/flows/authn-flow.xml" />
+
+        <!-- Login methods. -->
+        <webflow:flow-location id="AuthenticationFlow/Demo" path="/WEB-INF/flows/demo-authn-flow.xml" />
+
+        <!-- C14N methods. -->
+        <webflow:flow-location id="SubjectC14N/Simple" path="/WEB-INF/flows/simple-subject-c14n-flow.xml" />
+
+        <!-- CAS protocol flow. -->
+        <webflow:flow-location id="cas/login" path="classpath:/flows/cas-protocol-flow.xml" />
+        <webflow:flow-location id="cas/serviceValidate" path="classpath:/flows/cas-protocol-flow.xml" />
+    </webflow:flow-registry>
+
+    <webflow:flow-executor id="flowExecutor">
+        <webflow:flow-execution-repository max-execution-snapshots="0"/>
+    </webflow:flow-executor>
+
+    <webflow:flow-builder-services id="flowBuilderServices" view-factory-creator="mvcViewFactoryCreator" />
+
+    <bean id="mvcViewFactoryCreator" class="org.springframework.webflow.mvc.builder.MvcViewFactoryCreator">
+        <property name="viewResolvers">
+            <list>
+                <ref bean="cas.ViewResolver" />
+                <ref bean="idp.ViewResolver" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="idp.ViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/idp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <bean id="cas.ViewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver" />
+
+    <import resource="authn-comparison.xml" />
+    <import resource="authn-flow-descriptors.xml" />
+    <import resource="session-manager.xml" />
+
+</beans>

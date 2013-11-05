@@ -30,11 +30,11 @@ public final class FlowStateSupport {
     private FlowStateSupport() {}
 
     public static ServiceTicketRequest getServiceTicketRequest(final RequestContext context) {
-        return (ServiceTicketRequest) context.getRequestScope().get(SERVICE_TICKET_REQUEST_KEY);
+        return (ServiceTicketRequest) context.getFlowScope().get(SERVICE_TICKET_REQUEST_KEY);
     }
 
     public static void setServiceTicketRequest(final RequestContext context, final ServiceTicketRequest request) {
-        context.getRequestScope().put(SERVICE_TICKET_REQUEST_KEY, request);
+        context.getFlowScope().put(SERVICE_TICKET_REQUEST_KEY, request);
     }
 
     public static ServiceTicketResponse getServiceTicketResponse(final RequestContext context) {

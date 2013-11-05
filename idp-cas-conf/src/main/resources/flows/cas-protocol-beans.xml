@@ -66,11 +66,17 @@
     <bean id="initProfileRequestContext"
           class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" />
 
+    <bean id="dispatchProtocolAction"
+          class="net.shibboleth.idp.cas.flow.DispatchProtocolAction" />
+
     <bean id="initializeLoginAction"
           class="net.shibboleth.idp.cas.flow.InitializeLoginAction" />
 
     <bean id="checkAuthenticationRequiredAction"
           class="net.shibboleth.idp.cas.flow.CheckAuthenticationRequiredAction" />
+
+    <bean id="buildAuthenticationContextAction"
+          class="net.shibboleth.idp.cas.flow.BuildAuthenticationContextAction" />
 
     <bean id="grantServiceTicketAction"
           class="net.shibboleth.idp.cas.flow.GrantServiceTicketAction"

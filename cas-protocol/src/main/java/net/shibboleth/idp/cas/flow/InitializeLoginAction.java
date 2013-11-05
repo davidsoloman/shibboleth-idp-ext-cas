@@ -20,17 +20,18 @@ import org.springframework.webflow.execution.RequestContext;
  *
  * @author Marvin S. Addison
  */
-public class InitializeLoginAction extends AbstractProfileAction {
+public class InitializeLoginAction extends AbstractProfileAction<ServiceTicketRequest, Object> {
     @Nonnull
     @Override
     protected Event doExecute(
             final @Nonnull RequestContext springRequestContext,
-            final @Nonnull ProfileRequestContext profileRequestContext) throws ProfileException {
+            final @Nonnull ProfileRequestContext<ServiceTicketRequest, Object> profileRequestContext)
+            throws ProfileException {
 
         final ParameterMap params = springRequestContext.getRequestParameters();
         final String service = params.get(ProtocolParam.Service.id());
         if (service == null) {
-            return ActionSupport.buildProceedEvent(profileRequestContext);
+            return ActionSupport.buildEvent(this, "error");
         }
         final ServiceTicketRequest serviceTicketRequest = new ServiceTicketRequest(service);
 
@@ -46,7 +47,7 @@ public class InitializeLoginAction extends AbstractProfileAction {
             serviceTicketRequest.setGateway(true);
         }
 
-        final MessageContext messageContext = new MessageContext();
+        final MessageContext<ServiceTicketRequest> messageContext = new MessageContext<>();
         messageContext.setMessage(serviceTicketRequest);
         profileRequestContext.setInboundMessageContext(messageContext);
         FlowStateSupport.setServiceTicketRequest(springRequestContext, serviceTicketRequest);

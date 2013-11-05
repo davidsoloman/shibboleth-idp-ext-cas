@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+    <Get name="ThreadPool">
+        <Set name="minThreads" type="int"><Property name="threads.min" default="10"/></Set>
+        <Set name="maxThreads" type="int"><Property name="threads.max" default="200"/></Set>
+        <Set name="idleTimeout" type="int"><Property name="threads.timeout" default="60000"/></Set>
+        <Set name="detailedDump">false</Set>
+    </Get>
+
+
+    <!-- =========================================================== -->
+    <!-- Add shared Scheduler instance                               -->
+    <!-- =========================================================== -->
+    <Call name="addBean">
+        <Arg>
+            <New class="org.eclipse.jetty.util.thread.ScheduledExecutorScheduler"/>
+        </Arg>
+    </Call>
+
+
+    <!-- =========================================================== -->
+    <!-- Common HTTP configuration applies to all protocols          -->
+    <!-- =========================================================== -->
+    <New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+        <Set name="secureScheme">https</Set>
+        <Set name="securePort"><Property name="jetty.secure.port" default="8443" /></Set>
+        <Set name="outputBufferSize">32768</Set>
+        <Set name="requestHeaderSize">8192</Set>
+        <Set name="responseHeaderSize">8192</Set>
+        <Set name="sendServerVersion">true</Set>
+        <Set name="sendDateHeader">false</Set>
+        <Set name="headerCacheSize">512</Set>
+    </New>
+
+
+    <!-- =========================================================== -->
+    <!-- Set the default handler structure for the Server            -->
+    <!-- A handler collection is used to pass received requests to   -->
+    <!-- both the ContextHandlerCollection, which selects the next   -->
+    <!-- handler by context path and virtual host, and the           -->
+    <!-- DefaultHandler, which handles any requests not handled by   -->
+    <!-- the context handlers.                                       -->
+    <!-- Other handlers may be added to the "Handlers" collection,   -->
+    <!-- for example the jetty-requestlog.xml file adds the          -->
+    <!-- RequestLogHandler after the default handler                 -->
+    <!-- =========================================================== -->
+    <Set name="handler">
+        <New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
+            <Set name="handlers">
+                <Array type="org.eclipse.jetty.server.Handler">
+                    <Item>
+                        <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
+                    </Item>
+                    <Item>
+                        <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>
+                    </Item>
+                </Array>
+            </Set>
+        </New>
+    </Set>
+
+
+    <!-- =========================================================== -->
+    <!-- Define HTTPS connector                                      -->
+    <!-- =========================================================== -->
+    <New id="sslContextFactory" class="org.eclipse.jetty.util.ssl.SslContextFactory">
+        <Set name="KeyStorePath">src/main/jetty/localhost.p12</Set>
+        <Set name="KeyStoreType">PKCS12</Set>
+        <Set name="KeyStorePassword">changeit</Set>
+        <Set name="TrustStorePath">src/main/jetty/localhost.p12</Set>
+        <Set name="TrustStorePassword">changeit</Set>
+        <Set name="TrustStoreType">PKCS12</Set>
+        <Set name="EndpointIdentificationAlgorithm">HTTPS</Set>
+        <Set name="ExcludeCipherSuites">
+            <Array type="String">
+                <Item>SSL_RSA_WITH_DES_CBC_SHA</Item>
+                <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                <Item>SSL_DHE_DSS_WITH_DES_CBC_SHA</Item>
+                <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                <Item>SSL_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+                <Item>SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+                <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
+            </Array>
+        </Set>
+    </New>
+    <New id="sslHttpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+        <Arg><Ref refid="httpConfig"/></Arg>
+        <Call name="addCustomizer">
+            <Arg><New class="org.eclipse.jetty.server.SecureRequestCustomizer"/></Arg>
+        </Call>
+    </New>
+    <Call id="httpsConnector" name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.ServerConnector">
+                <Arg name="server"><Ref refid="Server" /></Arg>
+                <Arg name="factories">
+                    <Array type="org.eclipse.jetty.server.ConnectionFactory">
+                        <Item>
+                            <New class="org.eclipse.jetty.server.SslConnectionFactory">
+                                <Arg name="next">http/1.1</Arg>
+                                <Arg name="sslContextFactory"><Ref refid="sslContextFactory"/></Arg>
+                            </New>
+                        </Item>
+                        <Item>
+                            <New class="org.eclipse.jetty.server.HttpConnectionFactory">
+                                <Arg name="config"><Ref refid="sslHttpConfig"/></Arg>
+                            </New>
+                        </Item>
+                    </Array>
+                </Arg>
+                <Set name="host"><Property name="jetty.host" default="localhost" /></Set>
+                <Set name="port"><Property name="jetty.https.port" default="8443" /></Set>
+                <Set name="idleTimeout">30000</Set>
+            </New>
+        </Arg>
+    </Call>
+
+
+    <!-- =========================================================== -->
+    <!-- extra server options                                        -->
+    <!-- =========================================================== -->
+    <Set name="stopAtShutdown">true</Set>
+    <Set name="stopTimeout">5000</Set>
+    <Set name="dumpAfterStart"><Property name="jetty.dump.start" default="false"/></Set>
+    <Set name="dumpBeforeStop"><Property name="jetty.dump.stop" default="false"/></Set>
+
+</Configure>

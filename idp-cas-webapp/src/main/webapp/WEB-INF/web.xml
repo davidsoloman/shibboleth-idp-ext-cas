@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
 
     <!-- Context config params -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/common/global-beans.xml /WEB-INF/common/mvc-beans.xml</param-value>
+        <param-value>classpath:/conf/global-beans.xml /WEB-INF/spring/deployer-beans.xml</param-value>
     </context-param>
 
     <!-- Listeners -->
@@ -30,7 +32,7 @@
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>/WEB-INF/idp-servlet.xml</param-value>
+            <param-value>/WEB-INF/spring/idp-servlet.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -39,13 +41,13 @@
         <url-pattern>/idp/*</url-pattern>
     </servlet-mapping>
 
-
+<!--
     <servlet>
         <servlet-name>client</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>/WEB-INF/client-servlet.xml</param-value>
+            <param-value>/WEB-INF/spring/client-servlet.xml</param-value>
         </init-param>
         <load-on-startup>2</load-on-startup>
     </servlet>
@@ -53,11 +55,12 @@
         <servlet-name>client</servlet-name>
         <url-pattern>/client/*</url-pattern>
     </servlet-mapping>
+-->
 
 
     <!-- Container security config -->
     <security-constraint>
-        <display-name>IdP CAS Test Webapp</display-name>
+        <display-name>IdP CAS Demo Webapp</display-name>
         <web-resource-collection>
             <web-resource-name>Secure Area</web-resource-name>
             <url-pattern>/*</url-pattern>

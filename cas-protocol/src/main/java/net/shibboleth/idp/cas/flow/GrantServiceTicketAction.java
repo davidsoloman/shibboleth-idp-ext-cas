@@ -74,6 +74,7 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
                     springRequestContext, new ServiceTicketResponse(request.getService(), ticket.getId()));
             return new Event(this, Events.Success.id());
         } catch (RuntimeException e) {
+            log.error("Failed granting service ticket due to error.", e);
             return new Event(this, Events.Failure.id());
         }
     }

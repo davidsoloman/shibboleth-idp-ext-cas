@@ -6,8 +6,10 @@
   <p id="error">${validationError}</p>
 </c:if>
 
+<p>Authenticate with any credential where username = password.</p>
+
 <form action="${flowExecutionUrl}" method="post">
-  <fieldset>
+  <fieldset class="short">
     <div class="field">
       <label for="username">Username:</label>
       <input id="username" type="text" name="username" />
@@ -19,7 +21,7 @@
     <div class="field">
       <label for="donotcache">Disable SSO:</label>
       <input id="donotcache" type="checkbox" name="donotcache" value="1" />
-    <div id="field">
+    <div class="buttons">
       <button type="submit" name="_eventId_proceed">Login</button>
     </div>
   </fieldset>

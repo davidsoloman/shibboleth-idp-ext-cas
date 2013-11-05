@@ -88,8 +88,13 @@ public class ValidateServiceTicketAction
 
         final ServiceTicket ticket;
         try {
+            log.debug("Attempting to remove ticket {}", request.getTicket());
             ticket = ticketService.removeServiceTicket(request.getTicket());
+            if (ticket != null) {
+                log.debug("Removed {}", ticket);
+            }
         } catch (RuntimeException e) {
+            log.debug("CAS ticket retrieval failed with error: {}", e);
             return ProtocolError.TicketRetrievalError.event(this);
         }
         if (ticket == null || ticket.getExpirationInstant().isBeforeNow()) {
@@ -100,12 +105,14 @@ public class ValidateServiceTicketAction
         try {
             session = sessionResolver.resolveSingle(new CriteriaSet(new SessionIdCriterion(ticket.getSessionId())));
         } catch (ResolverException e) {
+            log.debug("IdP session retrieval failed with error: {}", e);
             return ProtocolError.SessionRetrievalError.event(this);
         }
         boolean expired = (session == null);
         if (session != null) {
             try {
                 expired = !session.checkTimeout();
+                log.debug("IdP session expired={}", expired);
             } catch (SessionException e) {
                 log.debug("Error performing session timeout check. Assuming session has expired.", e);
                 expired = true;
@@ -115,15 +122,18 @@ public class ValidateServiceTicketAction
             return ProtocolError.SessionExpired.event(this);
         }
         if (!ticket.getService().equalsIgnoreCase(request.getService())) {
+            log.debug("Service issued for {} does not match {}", ticket.getService(), request.getService());
             return ProtocolError.ServiceMismatch.event(this);
         }
         if (request.isRenew() != ticket.isRenew()) {
+            log.debug("Renew=true requested at validation time but ticket not issued with renew=true.");
             return ProtocolError.TicketNotFromRenew.event(this);
         }
         final ServiceTicketValidationResponse response = new ServiceTicketValidationResponse(session.getPrincipalName());
         FlowStateSupport.setServiceTicketValidationResponse(springRequestContext, response);
         if (request.getPgtUrl() != null) {
             try {
+                log.debug("Attempting proxy authentication to {}", request.getPgtUrl());
                 final ProxyIdentifiers proxyIds = proxyAuthenticator.authenticate(URI.create(request.getPgtUrl()));
                 ticketService.createProxyGrantingTicket(ticket, proxyIds.getPgtId());
                 response.setPgtIou(proxyIds.getPgtIou());
@@ -131,6 +141,7 @@ public class ValidateServiceTicketAction
                 log.info("Proxy authentication failed for " + request.getPgtUrl() + ": " + e);
             }
         }
+        log.info("Successfully validated {} for {}", request.getTicket(), request.getService());
         return new Event(this, Events.Success.id());
     }
 }

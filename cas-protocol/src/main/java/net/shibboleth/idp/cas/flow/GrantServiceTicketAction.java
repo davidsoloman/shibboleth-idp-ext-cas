@@ -67,11 +67,12 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
         }
         final ServiceTicket ticket;
         try {
-            log.debug("Creating ticket for ", request.getService());
+            log.debug("Granting ticket for {}", request.getService());
             ticket = ticketService.createServiceTicket(
                     sessionCtx.getIdPSession().getId(), request.getService(), request.isRenew());
             FlowStateSupport.setServiceTicketResponse(
                     springRequestContext, new ServiceTicketResponse(request.getService(), ticket.getId()));
+            log.info("Granted ticket for {}", request.getService());
             return new Event(this, Events.Success.id());
         } catch (RuntimeException e) {
             log.error("Failed granting service ticket due to error.", e);

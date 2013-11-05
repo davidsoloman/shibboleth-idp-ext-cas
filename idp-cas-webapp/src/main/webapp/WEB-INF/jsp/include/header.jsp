@@ -5,8 +5,10 @@
 <html lang="en">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="<c:url value="/css/vt.css" />" type="text/css" media="screen" />
     <title>Shibboleth IdP</title>
   </head>
   <body>
-    <div id="header">Shibboleth IdP</div>
+    <div id="page-wrapper">
+    <div id="page-header">Shibboleth IdP</div>
     <div id="content">

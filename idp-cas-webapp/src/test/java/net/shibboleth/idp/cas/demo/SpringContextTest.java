@@ -1,6 +1,6 @@
 package net.shibboleth.idp.cas.demo;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -18,9 +18,9 @@ public class SpringContextTest {
         return new Object[][] {
                 new Object[] {
                         new String [] {
-                                "classpath:/conf/global-beans.xml",
-                                "classpath:/conf/session-manager.xml",
-                                "file:src/main/webapp/WEB-INF/spring/idp-servlet.xml"
+                                "src/main/webapp/WEB-INF/spring/global-beans.xml",
+                                "src/main/webapp/WEB-INF/spring/deployer-beans.xml",
+                                "src/main/webapp/WEB-INF/spring/idp-servlet.xml"
                         }
                 }
         };
@@ -28,7 +28,7 @@ public class SpringContextTest {
 
     @Test(dataProvider = "contexts")
     public void testContext(final String[] contextPaths) {
-        final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(contextPaths);
+        final FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext(contextPaths);
         assertTrue(context.getBeanDefinitionCount() > 0);
     }
 }

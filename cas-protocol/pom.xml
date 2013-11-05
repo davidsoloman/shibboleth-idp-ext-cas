@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -16,6 +16,21 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <systemProperties>
+                        <idp.properties.path>classpath:/conf/idp.properties</idp.properties.path>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <!-- Compile dependencies -->
@@ -42,6 +57,24 @@
 
         <!-- Runtime dependencies -->
         <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-storage-impl</artifactId>
+            <version>${opensaml.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-core</artifactId>
+            <version>${shib.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-session-impl</artifactId>
+            <version>${shib.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>net.shibboleth.ext</groupId>
             <artifactId>spring-extensions</artifactId>
             <version>1.1-SNAPSHOT</version>
@@ -51,11 +84,6 @@
         <!-- Provided dependencies -->
 
         <!-- Test dependencies -->
-        <dependency>
-            <groupId>net.shibboleth.idp</groupId>
-            <artifactId>idp-cas-conf</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
@@ -80,5 +108,5 @@
             <version>9.0.6.v20130930</version>
             <scope>test</scope>
         </dependency>
-  </dependencies>
+    </dependencies>
 </project>

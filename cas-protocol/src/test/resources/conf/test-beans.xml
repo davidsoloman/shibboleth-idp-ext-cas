@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:p="http://www.springframework.org/schema/p"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -23,9 +22,6 @@
     <bean id="cas.proxyCallbackTrustStore"
           factory-method="createInstance"
           factory-bean="cas.proxyCallbackTrustStoreFactory" />
-
-    <util:constant id="cas.proxyHostnameVerifier"
-                   static-field="org.apache.http.conn.ssl.SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER" />
 
     <util:list id="shibboleth.AvailableAuthenticationFlows" />
 

@@ -7,7 +7,7 @@
     <!-- Context config params -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:/conf/global-beans.xml /WEB-INF/spring/deployer-beans.xml</param-value>
+        <param-value>/WEB-INF/spring/global-beans.xml /WEB-INF/spring/deployer-beans.xml</param-value>
     </context-param>
 
     <!-- Listeners -->

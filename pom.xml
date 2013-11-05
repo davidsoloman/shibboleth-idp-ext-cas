@@ -40,7 +40,6 @@
 
   <modules>
     <module>cas-protocol</module>
-    <module>idp-cas-conf</module>
     <module>idp-cas-webapp</module>
   </modules>
 

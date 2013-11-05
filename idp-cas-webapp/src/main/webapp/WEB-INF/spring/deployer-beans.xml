@@ -24,7 +24,4 @@
           factory-method="createInstance"
           factory-bean="cas.proxyCallbackTrustStoreFactory" />
 
-    <util:constant id="cas.proxyHostnameVerifier"
-                   static-field="org.apache.http.conn.ssl.SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER" />
-
 </beans>

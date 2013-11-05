@@ -10,7 +10,7 @@
        default-init-method="initialize"
        default-destroy-method="destroy">
 
-  <context:property-placeholder location="classpath:conf/idp.properties" ignore-unresolvable="false" ignore-resource-not-found="false" />
+  <context:property-placeholder location="classpath:/conf/idp.properties" ignore-unresolvable="false" ignore-resource-not-found="false" />
 
   <!-- This bean MUST be called "conversionService" to work properly. -->
   <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
@@ -24,7 +24,7 @@
   <bean id="shibboleth.LogbackLogging" class="net.shibboleth.idp.log.LogbackLoggingService" init-method="start" destroy-method="stop">
     <property name="id" value="shibboleth.LogbackLogging" />
     <property name="loggingConfiguration">
-      <bean class="net.shibboleth.utilities.java.support.resource.ClasspathResource" c:resourcePath="conf/logback.xml" />
+      <bean class="net.shibboleth.utilities.java.support.resource.ClasspathResource" c:resourcePath="conf/logback-test.xml" />
     </property>
     <property name="reloadCheckDelay" value="0" />
   </bean>

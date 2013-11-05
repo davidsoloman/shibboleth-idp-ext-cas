@@ -19,6 +19,7 @@ public class SpringContextTest {
                 new Object[] {
                         new String [] {
                                 "classpath:/conf/global-beans.xml",
+                                "classpath:/conf/session-manager.xml",
                                 "file:src/main/webapp/WEB-INF/spring/idp-servlet.xml"
                         }
                 }

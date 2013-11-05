@@ -14,8 +14,13 @@ import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.session.IdPSession;
 import net.shibboleth.idp.session.SessionException;
+import net.shibboleth.idp.session.SessionResolver;
 import net.shibboleth.idp.session.context.SessionContext;
+import net.shibboleth.idp.session.criterion.HttpServletRequestCriterion;
+import net.shibboleth.idp.session.criterion.SessionIdCriterion;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.profile.ProfileException;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -29,7 +34,7 @@ import org.springframework.webflow.execution.RequestContext;
  * <ul>
  *     <li>{@link ProtocolError#ServiceMismatch serviceMismatch}</li>
  *     <li>{@link ProtocolError#SessionExpired sessionExpired}</li>
- *     <li>{@link ProtocolError#SessionMismatch sessionMismatch}</li>
+ *     <li>{@link ProtocolError#SessionRetrievalError sessionRetrievalError}</li>
  *     <li>{@link ProtocolError#TicketExpired ticketExpired}</li>
  *     <li>{@link ProtocolError#TicketNotFromRenew ticketNotFromRenew}</li>
  *     <li>{@link ProtocolError#TicketRetrievalError ticketRetrievalError}</li>
@@ -51,12 +56,19 @@ public class ValidateServiceTicketAction
     /** Manages CAS tickets. */
     @Nonnull private TicketService ticketService;
 
+    /** Looks up IdP sessions. */
+    @Nonnull private SessionResolver sessionResolver;
+
     /** Performs proxy authentication. */
     @Nonnull private Authenticator<URI, ProxyIdentifiers> proxyAuthenticator;
 
 
     public void setTicketService(@Nonnull final TicketService ticketService) {
         this.ticketService = Constraint.isNotNull(ticketService, "Ticket service cannot be null.");
+    }
+
+    public void setSessionResolver(@Nonnull final SessionResolver resolver) {
+        this.sessionResolver = Constraint.isNotNull(resolver, "Session resolver cannot be null.");
     }
 
     public void setProxyAuthenticator(@Nonnull final Authenticator<URI, ProxyIdentifiers> proxyAuthenticator) {
@@ -69,7 +81,27 @@ public class ValidateServiceTicketAction
             final @Nonnull RequestContext springRequestContext,
             final @Nonnull ProfileRequestContext profileRequestContext) throws ProfileException {
 
-        final IdPSession session = getSession(profileRequestContext);
+        final TicketValidationRequest request = FlowStateSupport.getTicketValidationRequest(springRequestContext);
+        if (request == null) {
+            throw new ProfileException("TicketValidationRequest not found in flow state.");
+        }
+
+        final ServiceTicket ticket;
+        try {
+            ticket = ticketService.removeServiceTicket(request.getTicket());
+        } catch (RuntimeException e) {
+            return ProtocolError.TicketRetrievalError.event(this);
+        }
+        if (ticket == null || ticket.getExpirationInstant().isBeforeNow()) {
+            return ProtocolError.TicketExpired.event(this);
+        }
+
+        final IdPSession session;
+        try {
+            session = sessionResolver.resolveSingle(new CriteriaSet(new SessionIdCriterion(ticket.getSessionId())));
+        } catch (ResolverException e) {
+            return ProtocolError.SessionRetrievalError.event(this);
+        }
         boolean expired = (session == null);
         if (session != null) {
             try {
@@ -81,21 +113,6 @@ public class ValidateServiceTicketAction
         }
         if (expired) {
             return ProtocolError.SessionExpired.event(this);
-        }
-
-
-        final TicketValidationRequest request = FlowStateSupport.getTicketValidationRequest(springRequestContext);
-        final ServiceTicket ticket;
-        try {
-            ticket = ticketService.removeServiceTicket(request.getTicket());
-        } catch (RuntimeException e) {
-            return ProtocolError.TicketRetrievalError.event(this);
-        }
-        if (ticket == null || ticket.getExpirationInstant().isBeforeNow()) {
-            return ProtocolError.TicketExpired.event(this);
-        }
-        if (!ticket.getSessionId().equals(session.getId())) {
-            return ProtocolError.SessionMismatch.event(this);
         }
         if (!ticket.getService().equalsIgnoreCase(request.getService())) {
             return ProtocolError.ServiceMismatch.event(this);
@@ -115,13 +132,5 @@ public class ValidateServiceTicketAction
             }
         }
         return new Event(this, Events.Success.id());
-    }
-
-    protected IdPSession getSession(final ProfileRequestContext context) {
-        final SessionContext sessionCtx = context.getSubcontext(SessionContext.class, false);
-        if (sessionCtx != null) {
-            return sessionCtx.getIdPSession();
-        }
-        return null;
     }
 }

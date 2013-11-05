@@ -18,8 +18,8 @@ public enum ProtocolError {
     /** IdP session that issued ticket has expired which invalidates ticket. */
     SessionExpired("INVALID_TICKET", "E_SESSION_EXPIRED"),
 
-    /** Current IdP session is different from the one that issued the ticket. */
-    SessionMismatch("INVALID_TICKET", "E_SESSION_MISMATCH"),
+    /** Error retrieving IdP session. */
+    SessionRetrievalError("INVALID_TICKET", "E_SESSION_RETRIEVAL_ERROR"),
 
     /** Ticket parameter required but not specified. */
     TicketNotSpecified("INVALID_REQUEST", "E_TICKET_NOT_SPECIFIED"),

@@ -27,4 +27,6 @@
     <util:constant id="cas.proxyHostnameVerifier"
                    static-field="org.apache.http.conn.ssl.SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER" />
 
+    <util:list id="shibboleth.AvailableAuthenticationFlows" />
+
 </beans>

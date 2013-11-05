@@ -33,6 +33,7 @@ import static org.testng.AssertJUnit.fail;
  */
 @ContextConfiguration({
         "/conf/global-beans.xml",
+        "/conf/session-manager.xml",
         "/conf/test-beans.xml",
         "/flows/cas-protocol-beans.xml"
 })

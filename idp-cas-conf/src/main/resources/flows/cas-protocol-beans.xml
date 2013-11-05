@@ -88,6 +88,7 @@
     <bean id="validateServiceTicketAction"
           class="net.shibboleth.idp.cas.flow.ValidateServiceTicketAction"
           p:ticketService-ref="cas.ticketService"
+          p:sessionResolver-ref="shibboleth.SessionManager"
           p:proxyAuthenticator-ref="cas.proxyAuthenticator" />
 
 </beans>

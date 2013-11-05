@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
  */
 @ContextConfiguration({
         "/conf/global-beans.xml",
+        "/conf/session-manager.xml",
         "/conf/test-beans.xml",
         "/flows/cas-protocol-beans.xml"
 })
@@ -51,6 +52,13 @@ public abstract class AbstractProfileActionTest<T extends AbstractProfileAction>
         final RequestContext requestContext = createProfileContext();
         final ProfileRequestContext profileRequestContext =
                 (ProfileRequestContext) requestContext.getConversationScope().get(ProfileRequestContext.BINDING_KEY);
+        final SessionContext sessionContext = new SessionContext();
+        sessionContext.setIdPSession(createSession(sessionId, expiredFlag));
+        profileRequestContext.addSubcontext(sessionContext);
+        return requestContext;
+    }
+
+    protected static IdPSession createSession(final String sessionId, final boolean expiredFlag) {
         final IdPSession mockSession = mock(IdPSession.class);
         when(mockSession.getId()).thenReturn(sessionId);
         when(mockSession.getPrincipalName()).thenReturn(TEST_PRINCIPAL_NAME);
@@ -59,9 +67,6 @@ public abstract class AbstractProfileActionTest<T extends AbstractProfileAction>
         } catch (SessionException e) {
             throw new RuntimeException("Session exception", e);
         }
-        final SessionContext sessionContext = new SessionContext();
-        sessionContext.setIdPSession(mockSession);
-        profileRequestContext.addSubcontext(sessionContext);
-        return requestContext;
+        return mockSession;
     }
 }

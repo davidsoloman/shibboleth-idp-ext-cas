@@ -67,10 +67,10 @@
     <!-- Define HTTPS connector                                      -->
     <!-- =========================================================== -->
     <New id="sslContextFactory" class="org.eclipse.jetty.util.ssl.SslContextFactory">
-        <Set name="KeyStorePath">src/main/jetty/localhost.p12</Set>
+        <Set name="KeyStorePath"><SystemProperty name="jetty.conf.dir"/>localhost.p12</Set>
         <Set name="KeyStoreType">PKCS12</Set>
         <Set name="KeyStorePassword">changeit</Set>
-        <Set name="TrustStorePath">src/main/jetty/localhost.p12</Set>
+        <Set name="TrustStorePath"><SystemProperty name="jetty.conf.dir"/>localhost.p12</Set>
         <Set name="TrustStorePassword">changeit</Set>
         <Set name="TrustStoreType">PKCS12</Set>
         <Set name="EndpointIdentificationAlgorithm">HTTPS</Set>

@@ -11,17 +11,18 @@ Shibboleth IdP that supports the CAS 2.0 protocol.
 2. Maven 3.x
 
 ## Building
-Get the source and execute the following command from the root directory:
+Get the source and execute the following command from the project root
+directory:
 
-    mvn clean install
+    mvn clean package
 
-## Running
+## Running the Demo
 The source ships with a demonstration Web application that runs in an
-embedded Jetty servlet container launched via the maven-jetty-plugin Maven
-plugin. Launch the demo webapp by entering the idp-cas-webapp directory and
-executing the following command:
+embedded Jetty servlet container launched via the Maven Jetty plugin.
+Launch the demo webapp by executing the following command from the project
+root directory:
 
-    mvn jetty:run
+    mvn -Pdemo clean package
 
 The startup process is complete when you see the following output:
 

@@ -55,42 +55,66 @@
                     </systemProperties>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty.version}</version>
-                <configuration>
-                    <scanIntervalSeconds>10</scanIntervalSeconds>
-                    <webApp>
-                        <contextPath>/</contextPath>
-                    </webApp>
-                    <jettyXml>
-                        src/main/jetty/jetty.xml
-                    </jettyXml>
-                    <systemProperties>
-                        <systemProperty>
-                            <name>idp.properties.path</name>
-                            <value>classpath:/conf/idp.properties</value>
-                        </systemProperty>
-                        <!-- Configure system trust store for CAS client ticket validation -->
-                        <systemProperty>
-                            <name>javax.net.ssl.trustStore</name>
-                            <value>src/main/jetty/localhost.p12</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>javax.net.ssl.trustStoreType</name>
-                            <value>PKCS12</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>javax.net.ssl.trustStorePassword</name>
-                            <value>changeit</value>
-                        </systemProperty>
-                    </systemProperties>
-                </configuration>
-            </plugin>
-
         </plugins>
-
     </build>
+
+    <profiles>
+        <!--
+           | Run the demo webapp with from project root with following command:
+           | mvn -Pdemo clean package
+        -->
+        <profile>
+            <id>demo</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <scanIntervalSeconds>10</scanIntervalSeconds>
+                            <webApp>
+                                <contextPath>/</contextPath>
+                            </webApp>
+                            <jettyXml>
+                                ${basedir}/src/main/jetty/jetty.xml
+                            </jettyXml>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>idp.properties.path</name>
+                                    <value>classpath:/conf/idp.properties</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jetty.conf.dir</name>
+                                    <value>${basedir}/src/main/jetty/</value>
+                                </systemProperty>
+                                <!-- Configure system trust store for CAS client ticket validation -->
+                                <systemProperty>
+                                    <name>javax.net.ssl.trustStore</name>
+                                    <value>${basedir}/src/main/jetty/localhost.p12</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>javax.net.ssl.trustStoreType</name>
+                                    <value>PKCS12</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>javax.net.ssl.trustStorePassword</name>
+                                    <value>changeit</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>jetty-run</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

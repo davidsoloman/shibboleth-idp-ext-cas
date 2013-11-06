@@ -52,8 +52,6 @@
                 <configuration>
                     <systemProperties>
                         <idp.properties.path>classpath:/conf/idp.properties</idp.properties.path>
-                        <!-- Configure system trust store for CAS client validation -->
-                        <javax.net.ssl.keyStore>src/jetty/localhost.p12</javax.net.ssl.keyStore>
                     </systemProperties>
                 </configuration>
             </plugin>

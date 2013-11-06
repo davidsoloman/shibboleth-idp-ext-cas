@@ -23,11 +23,6 @@
         </dependency>
         <dependency>
             <groupId>net.shibboleth.idp</groupId>
-            <artifactId>idp-cas-conf</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-authn-impl</artifactId>
             <version>${shib.version}</version>
             <scope>runtime</scope>
@@ -35,12 +30,6 @@
         <dependency>
             <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-saml-api</artifactId>
-            <version>${shib.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.shibboleth.idp</groupId>
-            <artifactId>idp-conf</artifactId>
             <version>${shib.version}</version>
             <scope>runtime</scope>
         </dependency>

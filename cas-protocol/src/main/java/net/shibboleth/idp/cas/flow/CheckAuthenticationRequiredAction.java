@@ -18,14 +18,11 @@ package net.shibboleth.idp.cas.flow;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.base.Function;
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.session.IdPSession;
 import net.shibboleth.idp.session.SessionException;
 import net.shibboleth.idp.session.context.SessionContext;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
-import org.opensaml.profile.ProfileException;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +52,7 @@ public class CheckAuthenticationRequiredAction extends AbstractProfileAction<Ser
     @Override
     protected Event doExecute(
             final @Nonnull RequestContext springRequestContext,
-            final @Nonnull ProfileRequestContext<ServiceTicketRequest, Object> profileRequestContext)
-            throws ProfileException {
+            final @Nonnull ProfileRequestContext<ServiceTicketRequest, Object> profileRequestContext) {
 
         final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(springRequestContext);
 

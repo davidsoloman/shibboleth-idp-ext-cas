@@ -6,7 +6,6 @@ import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.ActionSupport;
-import org.opensaml.profile.ProfileException;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
@@ -21,8 +20,7 @@ public class BuildAuthenticationContextAction extends AbstractProfileAction<Serv
     @Override
     protected Event doExecute(
             final @Nonnull RequestContext springRequestContext,
-            final @Nonnull ProfileRequestContext<ServiceTicketRequest, Object> profileRequestContext)
-            throws ProfileException {
+            final @Nonnull ProfileRequestContext<ServiceTicketRequest, Object> profileRequestContext){
 
         final AuthenticationContext ac = new AuthenticationContext();
 

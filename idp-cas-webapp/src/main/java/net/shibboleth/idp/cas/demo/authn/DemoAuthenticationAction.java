@@ -6,9 +6,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.FailedLoginException;
 
 import net.shibboleth.idp.authn.AbstractValidationAction;
-import net.shibboleth.idp.authn.AuthenticationException;
 import net.shibboleth.idp.authn.AuthnEventIds;
-import net.shibboleth.idp.authn.UsernamePrincipal;
+import net.shibboleth.idp.authn.principal.UsernamePrincipal;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.UsernamePasswordContext;
 import org.opensaml.profile.action.ActionSupport;
@@ -34,7 +33,7 @@ public class DemoAuthenticationAction extends AbstractValidationAction {
 
     /** {@inheritDoc} */
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext,
-                                   @Nonnull final AuthenticationContext authenticationContext) throws AuthenticationException {
+                                   @Nonnull final AuthenticationContext authenticationContext) {
         if (authenticationContext.getAttemptedFlow() == null) {
             log.debug("{} no attempted flow within authentication context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
@@ -59,7 +58,7 @@ public class DemoAuthenticationAction extends AbstractValidationAction {
 
     /** {@inheritDoc} */
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext,
-                             @Nonnull final AuthenticationContext authenticationContext) throws AuthenticationException {
+                             @Nonnull final AuthenticationContext authenticationContext) {
 
         try {
             log.debug("{} attempting to authenticate user {}", getLogPrefix(), upContext.getUsername());
@@ -78,7 +77,7 @@ public class DemoAuthenticationAction extends AbstractValidationAction {
 
     @Nonnull
     @Override
-    protected Subject populateSubject(final @Nonnull Subject subject) throws AuthenticationException {
+    protected Subject populateSubject(final @Nonnull Subject subject) {
         subject.getPrincipals().add(new UsernamePrincipal(upContext.getUsername()));
         return subject;
     }

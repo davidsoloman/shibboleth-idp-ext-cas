@@ -25,7 +25,6 @@ import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import org.opensaml.profile.ProfileException;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +56,7 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
     @Override
     protected Event doExecute(
             final @Nonnull RequestContext springRequestContext,
-            final @Nonnull ProfileRequestContext<ServiceTicketRequest, ServiceTicketRequest> profileRequestContext)
-            throws ProfileException {
+            final @Nonnull ProfileRequestContext<ServiceTicketRequest, ServiceTicketRequest> profileRequestContext) {
 
         final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(springRequestContext);
         final SessionContext sessionCtx = profileRequestContext.getSubcontext(SessionContext.class, false);

@@ -8,7 +8,6 @@ import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.ActionSupport;
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.ProfileException;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.core.collection.ParameterMap;
 import org.springframework.webflow.execution.Event;
@@ -33,7 +32,7 @@ public class InitializeValidateAction extends AbstractProfileAction {
     @Override
     protected Event doExecute(
             final @Nonnull RequestContext springRequestContext,
-            final @Nonnull ProfileRequestContext profileRequestContext) throws ProfileException {
+            final @Nonnull ProfileRequestContext profileRequestContext) {
 
         final ParameterMap params = springRequestContext.getRequestParameters();
         final String service = params.get(ProtocolParam.Service.id());

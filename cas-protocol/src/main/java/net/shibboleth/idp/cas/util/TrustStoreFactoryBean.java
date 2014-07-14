@@ -3,16 +3,12 @@ package net.shibboleth.idp.cas.util;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import edu.vt.middleware.crypt.CryptException;
-import edu.vt.middleware.crypt.io.X509CertificateCredentialReader;
-import edu.vt.middleware.crypt.x509.DNUtils;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import org.cryptacular.util.CertUtil;
 import org.springframework.core.io.Resource;
 
 /**
@@ -49,16 +45,11 @@ public class TrustStoreFactoryBean {
         } catch (Exception e) {
             throw new RuntimeException("Error initializing keystore", e);
         }
-        final X509CertificateCredentialReader reader = new X509CertificateCredentialReader();
+        X509Certificate certificate;
         for (Resource resource : trustedCertificates) {
-            final X509Certificate certificate;
-            try {
-                certificate = reader.read(resource.getInputStream());
-            } catch (CryptException e) {
-                throw new RuntimeException("Error reading " + resource, e);
-            }
+            certificate = CertUtil.readCertificate(resource.getInputStream());
             keystore.setEntry(
-                    DNUtils.getCN(certificate.getSubjectX500Principal()),
+                    CertUtil.subjectCN(certificate),
                     new KeyStore.TrustedCertificateEntry(certificate),
                     null);
         }

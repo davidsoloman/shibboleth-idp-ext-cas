@@ -1,8 +1,10 @@
 package net.shibboleth.idp.cas.ticket;
 
+import net.shibboleth.idp.spring.IdPPropertiesApplicationContextInitializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertNotNull;
@@ -14,12 +16,17 @@ import static org.testng.AssertJUnit.assertEquals;
  *
  * @author Marvin S. Addison
  */
-@ContextConfiguration({
-        "/conf/global-beans.xml",
-        "/conf/session-manager.xml",
-        "/conf/test-beans.xml",
-        "/flows/cas-protocol-beans.xml"
-})
+@ContextConfiguration(
+        locations = {
+                "/system/conf/global-system.xml",
+                "/conf/global.xml",
+                "/system/conf/mvc-beans.xml",
+                "/conf/cas-protocol-beans.xml",
+                "/test/test-beans.xml",
+                "/test/test-cas-beans.xml",
+                "/test/test-webflow-config.xml" },
+        initializers = IdPPropertiesApplicationContextInitializer.class)
+@WebAppConfiguration
 public class SimpleTicketServiceTest extends AbstractTestNGSpringContextTests {
 
     private static final String TEST_SESSION_ID = "jHXRo42W0ATPEN+X5Zk1cw==";

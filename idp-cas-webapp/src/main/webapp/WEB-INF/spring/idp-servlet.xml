@@ -25,8 +25,8 @@
         <webflow:flow-location id="SubjectC14N/Simple" path="/WEB-INF/flows/simple-subject-c14n-flow.xml" />
 
         <!-- CAS protocol flow. -->
-        <webflow:flow-location id="cas/login" path="classpath:/flows/cas-protocol-flow.xml" />
-        <webflow:flow-location id="cas/serviceValidate" path="classpath:/flows/cas-protocol-flow.xml" />
+        <webflow:flow-location id="cas/login" path="classpath:/flows/cas/cas-protocol-flow.xml" />
+        <webflow:flow-location id="cas/serviceValidate" path="classpath:/flows/cas/cas-protocol-flow.xml" />
     </webflow:flow-registry>
 
     <webflow:flow-executor id="flowExecutor">

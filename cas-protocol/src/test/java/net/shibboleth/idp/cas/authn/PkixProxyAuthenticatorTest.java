@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.shibboleth.idp.spring.IdPPropertiesApplicationContextInitializer;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
@@ -19,6 +20,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -31,12 +33,17 @@ import static org.testng.AssertJUnit.fail;
  *
  * @author Marvin S. Addison
  */
-@ContextConfiguration({
-        "/conf/global-beans.xml",
-        "/conf/session-manager.xml",
-        "/conf/test-beans.xml",
-        "/flows/cas-protocol-beans.xml"
-})
+@ContextConfiguration(
+        locations = {
+                "/system/conf/global-system.xml",
+                "/conf/global.xml",
+                "/system/conf/mvc-beans.xml",
+                "/conf/cas-protocol-beans.xml",
+                "/test/test-beans.xml",
+                "/test/test-cas-beans.xml",
+                "/test/test-webflow-config.xml" },
+        initializers = IdPPropertiesApplicationContextInitializer.class)
+@WebAppConfiguration
 public class PkixProxyAuthenticatorTest extends AbstractTestNGSpringContextTests {
 
     @Autowired

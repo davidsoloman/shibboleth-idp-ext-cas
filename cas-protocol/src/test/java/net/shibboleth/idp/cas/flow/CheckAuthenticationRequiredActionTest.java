@@ -12,8 +12,7 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Marvin S. Addison
  */
-public class CheckAuthenticationRequiredActionTest
-        extends AbstractProfileActionTest<CheckAuthenticationRequiredAction> {
+public class CheckAuthenticationRequiredActionTest extends AbstractProfileActionTest {
 
     @Autowired
     private CheckAuthenticationRequiredAction action;

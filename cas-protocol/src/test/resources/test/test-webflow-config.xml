@@ -1,0 +1,81 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:webflow="http://www.springframework.org/schema/webflow-config"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/webflow-config http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.3.xsd">
+
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+          p:placeholderPrefix="%{" p:placeholderSuffix="}" />
+
+    <!--
+    Define custom flows by using the filesystem directly. Flows will be named based
+    on the directories between the base-path and the flow file ending in -flow.xml
+
+    NOTE: you cannot override named flows in the system registry below. If absolutely
+    necessary, you can comment out system flows to override them.
+    -->
+    <webflow:flow-registry id="userFlowRegistry" base-path="classpath:/flows" flow-builder-services="flowBuilderServices">
+        <webflow:flow-location-pattern value="/**/*-flow.xml" />
+    </webflow:flow-registry>
+
+    <!-- System-supplied flows, do not modify. -->
+    <webflow:flow-registry id="flowRegistry" parent="userFlowRegistry" base-path="classpath:/system/flows" flow-builder-services="flowBuilderServices">
+
+        <!-- Master flow for authentication. -->
+        <webflow:flow-location id="authn.abstract" path="/authn/authn-abstract-flow.xml" />
+        <webflow:flow-location id="authn" path="/authn/authn-flow.xml" />
+
+        <!-- Login methods. -->
+        <webflow:flow-location id="authn/IPAddress" path="/authn/ipaddress-authn-flow.xml" />
+        <webflow:flow-location id="authn/RemoteUserInternal" path="/authn/remoteuser-internal-authn-flow.xml" />
+        <webflow:flow-location id="authn/Password" path="/authn/password-authn-flow.xml" />
+        <webflow:flow-location id="authn/RemoteUser" path="/authn/remoteuser-authn-flow.xml" />
+        <webflow:flow-location id="authn/External" path="/authn/external-authn-flow.xml" />
+
+        <!-- Master flows for post-authn and SAML subject c14n. -->
+        <webflow:flow-location id="c14n.abstract" path="/c14n/subject-c14n-abstract-flow.xml" />
+        <webflow:flow-location id="c14n/authn" path="/c14n/subject-c14n-authn-flow.xml" />
+        <webflow:flow-location id="c14n/saml" path="/c14n/subject-c14n-saml-flow.xml" />
+
+        <!-- Standard post-login C14N methods. -->
+        <webflow:flow-location id="c14n/simple" path="/c14n/simple-subject-c14n-flow.xml" />
+        <webflow:flow-location id="c14n/attribute" path="/c14n/attribute-sourced-subject-c14n-flow.xml" />
+
+        <!--
+        Standard SAML C14N methods, including one supporting legacy use of the attribute resolver.
+        These all map to the same flow, and they derive the bean ID of an action to run based on the
+        flow id after the slash.
+        -->
+        <webflow:flow-location id="c14n/SAML2Transient" path="/c14n/subject-c14n-saml-default-flow.xml" />
+        <webflow:flow-location id="c14n/SAML2CryptoTransient" path="/c14n/subject-c14n-saml-default-flow.xml" />
+        <webflow:flow-location id="c14n/SAML2Persistent" path="/c14n/subject-c14n-saml-default-flow.xml" />
+        <webflow:flow-location id="c14n/SAML2Transform" path="/c14n/subject-c14n-saml-default-flow.xml" />
+        <webflow:flow-location id="c14n/SAML1Transient" path="/c14n/subject-c14n-saml-default-flow.xml" />
+        <webflow:flow-location id="c14n/SAML1CryptoTransient" path="/c14n/subject-c14n-saml-default-flow.xml" />
+        <webflow:flow-location id="c14n/SAML1Transform" path="/c14n/subject-c14n-saml-default-flow.xml" />
+        <webflow:flow-location id="c14n/LegacyPrincipalConnector" path="/c14n/subject-c14n-saml-default-flow.xml" />
+
+        <webflow:flow-location id="cas/CASProtocol" path="/cas/cas-protocol-flow.xml" />
+
+    </webflow:flow-registry>
+
+    <webflow:flow-executor id="flowExecutor">
+        <webflow:flow-execution-repository max-execution-snapshots="0" />
+    </webflow:flow-executor>
+
+    <webflow:flow-builder-services id="flowBuilderServices" view-factory-creator="mvcViewFactoryCreator" />
+
+    <bean id="mvcViewFactoryCreator" class="org.springframework.webflow.mvc.builder.MvcViewFactoryCreator">
+        <property name="viewResolvers">
+            <list>
+                <ref bean="shibboleth.VelocityViewResolver" />
+                <ref bean="shibboleth.InternalViewResolver" />
+            </list>
+        </property>
+    </bean>
+
+</beans>

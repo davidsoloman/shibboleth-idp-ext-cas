@@ -34,7 +34,7 @@ import static org.testng.Assert.assertNotNull;
  *
  * @author Marvin S. Addison
  */
-public class GrantServiceTicketActionTest extends AbstractProfileActionTest<GrantServiceTicketAction> {
+public class GrantServiceTicketActionTest extends AbstractProfileActionTest {
 
     @Autowired
     private GrantServiceTicketAction action;

@@ -4,11 +4,13 @@ import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.session.IdPSession;
 import net.shibboleth.idp.session.SessionException;
 import net.shibboleth.idp.session.context.SessionContext;
+import net.shibboleth.idp.spring.IdPPropertiesApplicationContextInitializer;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.webflow.execution.RequestContext;
 import org.springframework.webflow.test.MockExternalContext;
 import org.springframework.webflow.test.MockRequestContext;
@@ -21,14 +23,18 @@ import static org.mockito.Mockito.when;
  *
  * @author Marvin S. Addison
  */
-@ContextConfiguration({
-        "/conf/global-beans.xml",
-        "/conf/session-manager.xml",
-        "/conf/test-beans.xml",
-        "/flows/cas-protocol-beans.xml"
-})
-public abstract class AbstractProfileActionTest<T extends AbstractProfileAction>
-        extends AbstractTestNGSpringContextTests {
+@ContextConfiguration(
+        locations = {
+            "/system/conf/global-system.xml",
+            "/conf/global.xml",
+            "/system/conf/mvc-beans.xml",
+            "/conf/cas-protocol-beans.xml",
+            "/test/test-beans.xml",
+            "/test/test-cas-beans.xml",
+            "/test/test-webflow-config.xml" },
+        initializers = IdPPropertiesApplicationContextInitializer.class)
+@WebAppConfiguration
+public abstract class AbstractProfileActionTest extends AbstractTestNGSpringContextTests {
 
     protected static final String TEST_PRINCIPAL_NAME = "omega";
 

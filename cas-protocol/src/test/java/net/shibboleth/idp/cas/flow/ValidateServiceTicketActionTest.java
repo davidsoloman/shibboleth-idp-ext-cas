@@ -22,7 +22,7 @@ import static org.testng.AssertJUnit.assertEquals;
  *
  * @author Marvin S. Addison
  */
-public class ValidateServiceTicketActionTest extends AbstractProfileActionTest<ValidateServiceTicketAction> {
+public class ValidateServiceTicketActionTest extends AbstractProfileActionTest {
 
     private static final String TEST_SESSION_ID = "+TkSGIRofZyue/p8F4M7TA==";
 

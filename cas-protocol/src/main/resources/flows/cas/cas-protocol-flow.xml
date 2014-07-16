@@ -112,6 +112,6 @@
         <transition on="SubjectCanonicalizationError" to="error" />
     </global-transitions>
 
-    <bean-import resource="/conf/cas-protocol-beans.xml" />
+    <bean-import resource="%{idp.home}/conf/cas-protocol-beans.xml" />
 
 </flow>

@@ -34,6 +34,15 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>src/install</directory>
+            </testResource>
+        </testResources>
     </build>
 
     <dependencies>

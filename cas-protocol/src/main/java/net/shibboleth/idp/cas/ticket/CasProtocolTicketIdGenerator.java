@@ -16,15 +16,16 @@
  */
 package net.shibboleth.idp.cas.ticket;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.InitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
+import org.cryptacular.generator.IdGenerator;
+import org.cryptacular.generator.RandomIdGenerator;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,16 +39,13 @@ import org.springframework.util.StringUtils;
  *
  * @author Marvin S. Addison
  */
-public class CasProtocolTicketIdGenerator implements TicketIdGenerator {
+public class CasProtocolTicketIdGenerator implements TicketIdGenerator, InitializableComponent {
 
     /** Default ticket prefix, {@value}. */
     private static final String DEFAULT_PREFIX = "ST";
 
     /** Default number of characters in the random part of a generated ticket, {@value}. */
     private static final int DEFAULT_LENGTH = 25;
-
-    /** Allowed characters in random part of ticket identifier. */
-    private static final String ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345679";
 
     /** Number of characters in random part of generated ticket. */
     @Positive private int length = DEFAULT_LENGTH;
@@ -58,18 +56,8 @@ public class CasProtocolTicketIdGenerator implements TicketIdGenerator {
     /** Ticket suffix. */
     @Nullable private String suffix;
 
-    /** Random source . */
-    private final SecureRandom random;
-
-
-    /** Creates a new ticket generator instance. */
-    public CasProtocolTicketIdGenerator() {
-        try {
-            random = SecureRandom.getInstance("SHA1PRNG");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Cannot instantiate SHA1PRNG random algorithm.");
-        }
-    }
+    /** Generator of random ticket part. */
+    private IdGenerator randomPartGenerator;
 
     public void setLength(@Positive final int length) {
         this.length = (int) Constraint.isGreaterThan(0, length, "Length must be greater than 0.");
@@ -83,16 +71,30 @@ public class CasProtocolTicketIdGenerator implements TicketIdGenerator {
         this.suffix = StringSupport.trimOrNull(suffix);
     }
 
+    @Override
+    public boolean isInitialized() {
+        return randomPartGenerator != null;
+    }
+
+    @Override
+    public void initialize() throws ComponentInitializationException {
+        try {
+            randomPartGenerator = new RandomIdGenerator(this.length);
+        } catch (Exception e) {
+            throw new ComponentInitializationException("Error initializing random ID generator", e);
+        }
+    }
+
+    @Override
     @Nonnull public String generate() {
         final StringBuilder builder = new StringBuilder(2 * length);
         builder.append(prefix).append('-');
         builder.append(System.currentTimeMillis()).append('-');
-        for (int i = 0; i < length; i++) {
-            builder.append(ALLOWED_CHARS.charAt(random.nextInt(ALLOWED_CHARS.length())));
-        }
+        builder.append(randomPartGenerator.generate());
         if (StringUtils.hasText(suffix)) {
             builder.append('-').append(suffix);
         }
         return builder.toString();
     }
+
 }

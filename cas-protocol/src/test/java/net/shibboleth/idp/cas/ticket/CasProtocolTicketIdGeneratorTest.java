@@ -63,6 +63,7 @@ public class CasProtocolTicketIdGeneratorTest {
             final int expectedRandomLength,
             final String expectedSuffix) throws Exception {
 
+        generator.initialize();
         final long now = System.currentTimeMillis();
         final String id = generator.generate();
         final Matcher m = TICKET_REGEX.matcher(id);

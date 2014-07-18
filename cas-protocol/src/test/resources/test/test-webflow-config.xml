@@ -59,7 +59,8 @@
         <webflow:flow-location id="c14n/SAML1Transform" path="/c14n/subject-c14n-saml-default-flow.xml" />
         <webflow:flow-location id="c14n/LegacyPrincipalConnector" path="/c14n/subject-c14n-saml-default-flow.xml" />
 
-        <webflow:flow-location id="cas/CASProtocol" path="/cas/cas-protocol-flow.xml" />
+        <webflow:flow-location id="cas/login" path="/cas/login/login-flow.xml" />
+        <webflow:flow-location id="cas/serviceValidate" path="/cas/serviceValidate/serviceValidate-flow.xml" />
 
     </webflow:flow-registry>
 

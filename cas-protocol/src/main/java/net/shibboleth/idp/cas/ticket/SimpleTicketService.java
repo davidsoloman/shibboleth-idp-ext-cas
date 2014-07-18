@@ -61,10 +61,6 @@ public class SimpleTicketService implements TicketService {
     @Nonnull
     private TicketIdGenerator proxyTicketIdGenerator;
 
-    /** Creates identifiers for proxy-granting tickets. */
-    @Nonnull
-    private TicketIdGenerator proxyGrantingTicketIdGenerator;
-
     /** Validity time period of service tickets created with this factory. */
     @Duration
     @Positive
@@ -202,7 +198,7 @@ public class SimpleTicketService implements TicketService {
                 proxyTicketIdGenerator.generate(),
                 pgt.getSessionId(),
                 service,
-                DateTime.now().plus(proxyGrantingTicketValidityPeriod).toInstant(),
+                DateTime.now().plus(proxyTicketValidityPeriod).toInstant(),
                 renew,
                 pgt.getId());
         store(pt);

@@ -29,6 +29,6 @@ public class BuildAuthenticationContextAction extends AbstractProfileAction<Serv
         ac.setIsPassive(false);
 
         profileRequestContext.addSubcontext(ac, true);
-        return ActionSupport.buildProceedEvent(this);
+        return ActionSupport.buildEvent(this, Events.Proceed.id());
     }
 }

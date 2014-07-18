@@ -20,10 +20,10 @@ public class TrustStoreFactoryBeanTest {
     @DataProvider(name = "data")
     public Object[][] provideGenerators() {
         return new Object[][] {
-                new Object[] { new Resource[] { new ClassPathResource("/certs/nobody-1.pem") } },
+                new Object[] { new Resource[] { new ClassPathResource("/creds/nobody-1.pem") } },
                 new Object[] { new Resource[] {
-                        new ClassPathResource("/certs/nobody-1.pem"),
-                        new ClassPathResource("/certs/nobody-2.pem") },
+                        new ClassPathResource("/creds/nobody-1.pem"),
+                        new ClassPathResource("/creds/nobody-2.pem") },
                 },
         };
     }

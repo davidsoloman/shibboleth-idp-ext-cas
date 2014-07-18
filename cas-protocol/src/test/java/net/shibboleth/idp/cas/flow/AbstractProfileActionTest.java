@@ -28,10 +28,10 @@ import static org.mockito.Mockito.when;
             "/system/conf/global-system.xml",
             "/conf/global.xml",
             "/system/conf/mvc-beans.xml",
-            "/conf/cas-protocol-beans.xml",
             "/test/test-beans.xml",
-            "/test/test-cas-beans.xml",
-            "/test/test-webflow-config.xml" },
+            "/test/test-webflow-config.xml",
+            "/flows/cas/login/login-beans.xml",
+            "/flows/cas/serviceValidate/serviceValidate-beans.xml"},
         initializers = IdPPropertiesApplicationContextInitializer.class)
 @WebAppConfiguration
 public abstract class AbstractProfileActionTest extends AbstractTestNGSpringContextTests {

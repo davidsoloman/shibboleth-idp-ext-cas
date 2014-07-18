@@ -38,10 +38,10 @@ import static org.testng.AssertJUnit.fail;
                 "/system/conf/global-system.xml",
                 "/conf/global.xml",
                 "/system/conf/mvc-beans.xml",
-                "/conf/cas-protocol-beans.xml",
                 "/test/test-beans.xml",
-                "/test/test-cas-beans.xml",
-                "/test/test-webflow-config.xml" },
+                "/test/test-webflow-config.xml",
+                "/flows/cas/login/login-beans.xml",
+                "/flows/cas/serviceValidate/serviceValidate-beans.xml"},
         initializers = IdPPropertiesApplicationContextInitializer.class)
 @WebAppConfiguration
 public class PkixProxyAuthenticatorTest extends AbstractTestNGSpringContextTests {
@@ -52,9 +52,9 @@ public class PkixProxyAuthenticatorTest extends AbstractTestNGSpringContextTests
     @DataProvider(name = "data")
     public Object[][] buildTestData() {
         return new Object[][] {
-                new Object[] { "src/test/resources/certs/nobody-1.p12", 200, new CertificateException() },
-                new Object[] { "src/test/resources/certs/nobody-2.p12", 200, null },
-                new Object[] { "src/test/resources/certs/nobody-2.p12", 404, new FailedLoginException() },
+                new Object[] { "src/test/resources/creds/nobody-1.p12", 200, new CertificateException() },
+                new Object[] { "src/test/resources/creds/nobody-2.p12", 200, null },
+                new Object[] { "src/test/resources/creds/nobody-2.p12", 404, new FailedLoginException() },
         };
     }
 

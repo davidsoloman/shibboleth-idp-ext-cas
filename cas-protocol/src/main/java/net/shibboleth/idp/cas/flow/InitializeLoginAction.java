@@ -49,6 +49,6 @@ public class InitializeLoginAction extends AbstractProfileAction<ServiceTicketRe
         messageContext.setMessage(serviceTicketRequest);
         profileRequestContext.setInboundMessageContext(messageContext);
         FlowStateSupport.setServiceTicketRequest(springRequestContext, serviceTicketRequest);
-        return ActionSupport.buildProceedEvent(profileRequestContext);
+        return ActionSupport.buildEvent(profileRequestContext, Events.Proceed.id());
     }
 }

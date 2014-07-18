@@ -93,9 +93,12 @@
                                 <unzip src="${build.directory}/idp-distribution.zip" dest="${build.directory}"/>
                                 <unzip src="${build.directory}/cas-protocol-distribution.zip" dest="${build.directory}"/>
                                 <move file="${build.directory}/idp-distribution-${shib.version}" tofile="${idp.home}" />
+                                <move file="${build.directory}/cas-protocol-${project.version}/cas-protocol-${project.version}.jar"
+                                      todir="${idp.home}/war/WEB-INF/lib" />
                                 <move todir="${idp.home}">
                                     <fileset dir="${build.directory}/cas-protocol-${project.version}">
                                         <include name="conf/**" />
+                                        <include name="creds/**" />
                                         <include name="flows/**" />
                                         <include name="views/**" />
                                     </fileset>

@@ -55,6 +55,6 @@ public class InitializeValidateAction extends AbstractProfileAction {
         messageContext.setMessage(ticketValidationRequest);
         profileRequestContext.setInboundMessageContext(messageContext);
         FlowStateSupport.setTicketValidationRequest(springRequestContext, ticketValidationRequest);
-        return ActionSupport.buildProceedEvent(profileRequestContext);
+        return ActionSupport.buildEvent(profileRequestContext, Events.Proceed.id());
     }
 }

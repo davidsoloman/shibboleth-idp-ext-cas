@@ -42,8 +42,8 @@ public enum Events {
     /** Generic failure event. */
     Failure,
 
-    /** Protocol URI not recognized. */
-    UnknownProtocolUri;
+    /** Generic proceed event. */
+    Proceed;
 
     /**
      * Converts enumeration name to an identifier suitable for a Spring Webflow event identifier.

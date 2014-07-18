@@ -19,49 +19,8 @@
 <flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
 
-    <on-start>
-        <evaluate expression="initProfileRequestContext"/>
-    </on-start>
-
-    <action-state id="dispatchProtocol">
-        <evaluate expression="dispatchProtocolAction" />
-        <transition on="login" to="initializeLogin"/>
-        <!--<transition on="validate" to="initializeValidate"/>-->
-        <transition on="serviceValidate" to="initializeValidate"/>
-        <!--<transition on="proxy" to="initializeProxy"/>-->
-        <!--<transition on="proxyValidate" to="initializeValidate"/>-->
-        <transition on="unknownProtocolUri" to="error" />
-    </action-state>
-
-    <action-state id="initializeLogin">
-        <evaluate expression="initializeLoginAction" />
-        <transition on="proceed" to="checkAuthenticationRequired" />
-    </action-state>
-
-    <action-state id="checkAuthenticationRequired">
-        <evaluate expression="checkAuthenticationRequiredAction"/>
-        <transition on="sessionNotFound" to="buildAuthenticationContext" />
-        <transition on="sessionFound" to="grantServiceTicket" />
-        <transition on="renewRequested" to="buildAuthenticationContext" />
-        <transition on="gatewayRequested" to="gatewayRedirect" />
-    </action-state>
-
-    <action-state id="buildAuthenticationContext">
-        <evaluate expression="buildAuthenticationContextAction"/>
-        <transition on="proceed" to="authenticate" />
-    </action-state>
-
-    <subflow-state id="authenticate" subflow="Authentication">
-        <transition on="proceed" to="grantServiceTicket" />
-    </subflow-state>
-
-    <action-state id="grantServiceTicket">
-        <evaluate expression="grantServiceTicketAction" />
-        <transition on="success" to="redirectToService" />
-        <transition on="failure" to="error" />
-    </action-state>
-
     <action-state id="initializeValidate">
+        <evaluate expression="initProfileRequestContext"/>
         <evaluate expression="initializeValidateAction" />
         <transition on="serviceNotSpecified" to="serviceValidateFailure" />
         <transition on="ticketNotSpecified" to="serviceValidateFailure" />
@@ -79,10 +38,6 @@
         <transition on="success" to="serviceValidateSuccess" />
     </action-state>
 
-    <!-- Redirect end states -->
-    <end-state id="redirectToService" view="externalRedirect:#{requestScope.serviceTicketResponse.redirectUrl}" />
-    <end-state id="gatewayRedirect" view="externalRedirect:#{requestScope.serviceTicketRequest.service}" />
-
     <!-- View end states -->
     <end-state id="serviceValidateSuccess" view="serviceValidateSuccess">
         <on-entry>
@@ -97,21 +52,6 @@
         </on-entry>
     </end-state>
 
-    <!-- Error end states -->
-    <end-state id="error" view="profileErrorView" />
-
-    <global-transitions>
-        <transition on="error" to="error" />
-        <transition on="IdentitySwitch" to="error" />
-        <transition on="InputOutputError" to="error" />
-        <transition on="InvalidCredentials" to="error" />
-        <transition on="InvalidProfileContext" to="error" />
-        <transition on="NoCredentials" to="error" />
-        <transition on="NoPotentialFlow" to="error" />
-        <transition on="RequestUnsupported" to="error" />
-        <transition on="SubjectCanonicalizationError" to="error" />
-    </global-transitions>
-
-    <bean-import resource="%{idp.home}/conf/cas-protocol-beans.xml" />
+    <bean-import resource="serviceValidate-beans.xml" />
 
 </flow>

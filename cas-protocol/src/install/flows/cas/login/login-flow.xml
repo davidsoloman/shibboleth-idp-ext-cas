@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Licensed to the University Corporation for Advanced Internet Development,
+  ~ Inc. (UCAID) under one or more contributor license agreements.  See the
+  ~ NOTICE file distributed with this work for additional information regarding
+  ~ copyright ownership. The UCAID licenses this file to You under the Apache
+  ~ License, Version 2.0 (the "License"); you may not use this file except in
+  ~ compliance with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+    <action-state id="initializeLogin">
+        <evaluate expression="initProfileRequestContext"/>
+        <evaluate expression="initializeLoginAction" />
+        <transition on="proceed" to="checkAuthenticationRequired" />
+    </action-state>
+
+    <action-state id="checkAuthenticationRequired">
+        <evaluate expression="checkAuthenticationRequiredAction"/>
+        <transition on="sessionNotFound" to="buildAuthenticationContext" />
+        <transition on="sessionFound" to="grantServiceTicket" />
+        <transition on="renewRequested" to="buildAuthenticationContext" />
+        <transition on="gatewayRequested" to="gatewayRedirect" />
+    </action-state>
+
+    <action-state id="buildAuthenticationContext">
+        <evaluate expression="buildAuthenticationContextAction"/>
+        <transition on="proceed" to="authenticate" />
+    </action-state>
+
+    <subflow-state id="authenticate" subflow="authn">
+        <input name="calledAsSubflow" value="true" />
+        <transition on="proceed" to="grantServiceTicket" />
+    </subflow-state>
+
+    <action-state id="grantServiceTicket">
+        <evaluate expression="grantServiceTicketAction" />
+        <transition on="success" to="redirectToService" />
+        <transition on="failure" to="error" />
+    </action-state>
+
+    <!-- Redirect end states -->
+    <end-state id="redirectToService" view="externalRedirect:#{requestScope.serviceTicketResponse.redirectUrl}" />
+    <end-state id="gatewayRedirect" view="externalRedirect:#{requestScope.serviceTicketRequest.service}" />
+
+    <bean-import resource="login-beans.xml" />
+
+</flow>

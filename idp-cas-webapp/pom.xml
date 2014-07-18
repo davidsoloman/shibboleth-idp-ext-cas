@@ -8,6 +8,13 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <idp.home>${build.directory}/idp</idp.home>
+        <idp.src>${basedir}/src/main/idp</idp.src>
+        <jetty.home>${idp.home}/jetty-base</jetty.home>
+        <jetty.src>${basedir}/src/main/jetty</jetty.src>
+    </properties>
+
     <groupId>net.shibboleth</groupId>
     <artifactId>idp-cas-webapp</artifactId>
     <packaging>war</packaging>
@@ -17,26 +24,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.shibboleth.idp</groupId>
-            <artifactId>cas-protocol</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.shibboleth.idp</groupId>
-            <artifactId>idp-authn-impl</artifactId>
-            <version>${shib.version}</version>
-            <scope>runtime</scope>
-         </dependency>
-        <dependency>
-            <groupId>net.shibboleth.idp</groupId>
-            <artifactId>idp-saml-api</artifactId>
-            <version>${shib.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jasig.cas.client</groupId>
             <artifactId>cas-client-core</artifactId>
-            <version>3.2.1</version>
+            <version>3.3.1</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
@@ -47,13 +37,89 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12.4</version>
-                <configuration>
-                    <systemProperties>
-                        <idp.properties.path>classpath:/conf/idp.properties</idp.properties.path>
-                    </systemProperties>
-                </configuration>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-idp-dist</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${build.directory}</outputDirectory>
+                            <stripVersion>true</stripVersion>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>net.shibboleth.idp</groupId>
+                                    <artifactId>idp-distribution</artifactId>
+                                    <version>${shib.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-cas-dist</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${build.directory}</outputDirectory>
+                            <stripVersion>true</stripVersion>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>net.shibboleth.idp</groupId>
+                                    <artifactId>cas-protocol</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>distribution</classifier>
+                                    <overWrite>true</overWrite>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <target>
+                                <unzip src="${build.directory}/idp-distribution.zip" dest="${build.directory}"/>
+                                <unzip src="${build.directory}/cas-protocol-distribution.zip" dest="${build.directory}"/>
+                                <move file="${build.directory}/idp-distribution-${shib.version}" tofile="${idp.home}" />
+                                <move todir="${idp.home}">
+                                    <fileset dir="${build.directory}/cas-protocol-${project.version}">
+                                        <include name="conf/**" />
+                                        <include name="flows/**" />
+                                        <include name="views/**" />
+                                    </fileset>
+                                </move>
+                                <copy todir="${idp.home}">
+                                    <fileset dir="${idp.src}">
+                                        <include name="*/**" />
+                                    </fileset>
+                                </copy>
+                                <copy file="${jetty.src}/webdefault.xml" todir="${jetty.home}/etc" />
+                                <copy file="${jetty.src}/cas-demo-users.properties" todir="/tmp" />
+                                <copy file="${jetty.src}/idp.ini" todir="${jetty.home}/start.d">
+                                    <filterset>
+                                        <filter token="idp.home" value="${idp.home}"/>
+                                        <filter token="jetty.src" value="${jetty.src}"/>
+                                    </filterset>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -71,22 +137,52 @@
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
                         <version>${jetty.version}</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>net.shibboleth.utilities.jetty9</groupId>
+                                <artifactId>jetty9-dta-ssl</artifactId>
+                                <version>1.0-SNAPSHOT</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.eclipse.jetty</groupId>
+                                <artifactId>jetty-deploy</artifactId>
+                                <version>${jetty.version}</version>
+                            </dependency>
+                        </dependencies>
                         <configuration>
                             <scanIntervalSeconds>10</scanIntervalSeconds>
                             <webApp>
-                                <contextPath>/</contextPath>
+                                <contextPath>/demo</contextPath>
                             </webApp>
                             <jettyXml>
-                                ${basedir}/src/main/jetty/jetty.xml
+                                ${jetty.home}/etc/jetty.xml,${jetty.home}/etc/jetty-deploy.xml
                             </jettyXml>
                             <systemProperties>
                                 <systemProperty>
-                                    <name>idp.properties.path</name>
-                                    <value>classpath:/conf/idp.properties</value>
+                                    <name>idp.home</name>
+                                    <value>${idp.home}</value>
+                                </systemProperty>
+                                <!-- Jetty properties -->
+                                <systemProperty>
+                                    <name>jetty.base</name>
+                                    <value>${jetty.home}</value>
                                 </systemProperty>
                                 <systemProperty>
-                                    <name>jetty.conf.dir</name>
-                                    <value>${basedir}/src/main/jetty/</value>
+                                    <name>jetty.home</name>
+                                    <value>${idp.home}/jetty-base</value>
+                                </systemProperty>
+                                <!-- Configure properties for Jetty HTTPS connector  -->
+                                <systemProperty>
+                                    <name>jetty.keystore.path</name>
+                                    <value>${basedir}/src/main/jetty/localhost.p12</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jetty.keystore.type</name>
+                                    <value>PKCS12</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jetty.keystore.password</name>
+                                    <value>changeit</value>
                                 </systemProperty>
                                 <!-- Configure system trust store for CAS client ticket validation -->
                                 <systemProperty>

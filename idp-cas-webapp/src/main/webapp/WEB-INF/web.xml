@@ -4,30 +4,10 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0">
 
-    <!-- Context config params -->
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring/global-beans.xml /WEB-INF/spring/deployer-beans.xml</param-value>
-    </context-param>
     <context-param>
         <param-name>serverName</param-name>
-        <param-value>https://localhost:8443</param-value>
+        <param-value>localhost</param-value>
     </context-param>
-
-    <!-- Listeners -->
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    
-    <!-- Filters and filter mappings -->
-    <filter>
-        <filter-name>RequestResponseContextFilter</filter-name>
-        <filter-class>net.shibboleth.utilities.java.support.net.RequestResponseContextFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>RequestResponseContextFilter</filter-name>
-        <url-pattern>/idp/*</url-pattern>
-    </filter-mapping>
 
     <filter>
         <filter-name>CASAuthenticationFilter</filter-name>
@@ -41,7 +21,7 @@
     </filter>
     <filter-mapping>
         <filter-name>CASAuthenticationFilter</filter-name>
-        <url-pattern>/client/*</url-pattern>
+        <url-pattern>/protected/*</url-pattern>
     </filter-mapping>
 
     <filter>
@@ -54,7 +34,7 @@
     </filter>
     <filter-mapping>
         <filter-name>CASValidationFilter</filter-name>
-        <url-pattern>/client/*</url-pattern>
+        <url-pattern>/protected/*</url-pattern>
     </filter-mapping>
 
     <filter>
@@ -63,25 +43,8 @@
     </filter>
     <filter-mapping>
         <filter-name>CASRequestWrapperFilter</filter-name>
-        <url-pattern>/client/*</url-pattern>
+        <url-pattern>/protected/*</url-pattern>
     </filter-mapping>
-
-
-    <!-- Servlets and servlet mappings -->
-    <servlet>
-        <servlet-name>idp</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <init-param>
-            <param-name>contextConfigLocation</param-name>
-            <param-value>/WEB-INF/spring/idp-servlet.xml</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>idp</servlet-name>
-        <url-pattern>/idp/*</url-pattern>
-    </servlet-mapping>
-
 
     <!-- Container security config -->
     <security-constraint>

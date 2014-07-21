@@ -109,8 +109,8 @@
                                     </fileset>
                                 </copy>
                                 <copy file="${jetty.src}/webdefault.xml" todir="${jetty.home}/etc" />
-                                <copy file="${jetty.src}/cas-demo-users.properties" todir="/tmp" />
-                                <copy file="${jetty.src}/idp.ini" todir="${jetty.home}/start.d">
+                                <copy file="${jetty.src}/cas-demo-users.properties" todir="/tmp" overwrite="true" />
+                                <copy file="${jetty.src}/idp.ini" todir="${jetty.home}/start.d" overwrite="true">
                                     <filterset>
                                         <filter token="idp.home" value="${idp.home}"/>
                                         <filter token="jetty.src" value="${jetty.src}"/>

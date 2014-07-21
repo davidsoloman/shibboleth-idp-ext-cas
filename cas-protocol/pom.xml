@@ -25,7 +25,7 @@
                 <version>2.12.4</version>
                 <configuration>
                     <systemProperties>
-                        <idp.home>file:${basedir}/target/test-classes</idp.home>
+                        <idp.home>classpath:</idp.home>
                     </systemProperties>
                 </configuration>
             </plugin>
@@ -43,6 +43,24 @@
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Use ANT to clean up logging created during test phase -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="${basedir}/classpath" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
                         </goals>
                     </execution>
                 </executions>

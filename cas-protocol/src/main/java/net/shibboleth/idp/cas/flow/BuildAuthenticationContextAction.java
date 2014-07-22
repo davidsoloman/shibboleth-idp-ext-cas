@@ -27,6 +27,7 @@ public class BuildAuthenticationContextAction extends AbstractProfileAction<Serv
         final ServiceTicketRequest request = profileRequestContext.getInboundMessageContext().getMessage();
         ac.setForceAuthn(request.isRenew());
         ac.setIsPassive(false);
+        ac.setBrowserProfile(true);
 
         profileRequestContext.addSubcontext(ac, true);
         return ActionSupport.buildEvent(this, Events.Proceed.id());

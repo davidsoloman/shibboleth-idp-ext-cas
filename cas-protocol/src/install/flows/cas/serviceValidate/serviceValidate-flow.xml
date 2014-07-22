@@ -39,13 +39,13 @@
     </action-state>
 
     <!-- View end states -->
-    <end-state id="serviceValidateSuccess" view="serviceValidateSuccess">
+    <end-state id="serviceValidateSuccess" view="cas/serviceValidateSuccess">
         <on-entry>
             <set name="flashScope.username" value="requestScope.serviceTicketValidationResponse.username" />
             <set name="flashScope.pgtIou" value="requestScope.serviceTicketValidationResponse.pgtIou" />
         </on-entry>
     </end-state>
-    <end-state id="serviceValidateFailure" view="serviceValidateFailure">
+    <end-state id="serviceValidateFailure" view="cas/serviceValidateFailure">
         <on-entry>
             <set name="flashScope.code" value="currentEvent.attributes.code" />
             <set name="flashScope.detailCode" value="currentEvent.attributes.detailCode" />

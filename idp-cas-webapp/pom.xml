@@ -103,9 +103,9 @@
                                         <include name="views/**" />
                                     </fileset>
                                 </move>
-                                <copy todir="${idp.home}">
+                                <copy todir="${idp.home}" overwrite="true">
                                     <fileset dir="${idp.src}">
-                                        <include name="*/**" />
+                                        <include name="**" />
                                     </fileset>
                                 </copy>
                                 <copy file="${jetty.src}/webdefault.xml" todir="${jetty.home}/etc" />

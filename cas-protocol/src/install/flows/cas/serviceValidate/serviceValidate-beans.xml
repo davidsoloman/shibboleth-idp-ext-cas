@@ -35,17 +35,18 @@
           c:trustStore-ref="cas.proxyCallbackTrustStore"
           c:hostnameVerifier-ref="cas.proxyHostnameVerifier" />
 
+    <bean id="cas.proxyCallbackTrustStoreResource"
+          class="org.cryptacular.io.FileResource"
+          c:file="%{cas.proxy.trustStorePath:%{idp.home}/creds/idp-tls.p12}" />
+
     <bean id="cas.proxyCallbackTrustStoreFactory"
-          class="net.shibboleth.idp.cas.util.TrustStoreFactoryBean">
-        <property name="trustedCertificates">
-            <list>
-                <value>%{idp.home}/creds/cas-proxy-trust.crt</value>
-            </list>
-        </property>
-    </bean>
+          class="org.cryptacular.bean.KeyStoreFactoryBean"
+          p:resource-ref="cas.proxyCallbackTrustStoreResource"
+          p:type="%{cas.proxy.trustStoreType:PKCS12}"
+          p:password="%{cas.proxy.trustStorePassword:changeit}" />
 
     <bean id="cas.proxyCallbackTrustStore"
-          factory-method="createInstance"
+          factory-method="newInstance"
           factory-bean="cas.proxyCallbackTrustStoreFactory" />
 
     <util:constant id="cas.proxyHostnameVerifier"

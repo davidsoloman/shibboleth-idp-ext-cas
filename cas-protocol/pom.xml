@@ -26,6 +26,7 @@
                 <configuration>
                     <systemProperties>
                         <idp.home>classpath:</idp.home>
+                        <cas.proxy.trustStorePath>target/test-classes/creds/nobody-2.p12</cas.proxy.trustStorePath>
                     </systemProperties>
                 </configuration>
             </plugin>

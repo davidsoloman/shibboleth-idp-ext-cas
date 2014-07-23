@@ -88,10 +88,10 @@ public class ValidateServiceTicketAction
 
         final ServiceTicket ticket;
         try {
-            log.debug("Attempting to remove ticket {}", request.getTicket());
+            log.debug("Attempting to validate {}", request.getTicket());
             ticket = ticketService.removeServiceTicket(request.getTicket());
             if (ticket != null) {
-                log.debug("Removed {}", ticket);
+                log.debug("Found and removed {}/{} from ticket store", ticket, ticket.getSessionId());
             }
         } catch (RuntimeException e) {
             log.debug("CAS ticket retrieval failed with error: {}", e);

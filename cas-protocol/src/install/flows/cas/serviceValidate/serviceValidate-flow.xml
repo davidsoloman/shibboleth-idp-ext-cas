@@ -43,6 +43,7 @@
         <on-entry>
             <set name="flashScope.username" value="requestScope.serviceTicketValidationResponse.username" />
             <set name="flashScope.pgtIou" value="requestScope.serviceTicketValidationResponse.pgtIou" />
+            <set name="flashScope.escapeUtils" value="T(org.apache.commons.lang.StringEscapeUtils)" />
         </on-entry>
     </end-state>
     <end-state id="serviceValidateFailure" view="cas/serviceValidateFailure">

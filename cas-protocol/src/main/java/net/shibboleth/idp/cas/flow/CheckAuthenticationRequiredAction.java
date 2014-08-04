@@ -92,6 +92,6 @@ public class CheckAuthenticationRequiredAction extends AbstractProfileAction<Ser
             log.debug("Session context not found.");
             result = Events.SessionNotFound;
         }
-        return new Event(this, result.id());
+        return result.event(this);
     }
 }

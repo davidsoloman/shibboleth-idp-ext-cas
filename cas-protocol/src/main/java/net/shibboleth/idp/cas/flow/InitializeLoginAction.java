@@ -2,10 +2,10 @@ package net.shibboleth.idp.cas.flow;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.ProtocolParam;
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.core.collection.ParameterMap;
@@ -13,9 +13,13 @@ import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 
 /**
- * Initializes the CAS protocol interaction at the <code>/login</code> URI.
- * Places a {@link ServiceTicketRequest} object in request scope under the key
- * {@value FlowStateSupport#SERVICE_TICKET_REQUEST_KEY} if and only if a service was specified.
+ * Initializes the CAS protocol interaction at the <code>/login</code> URI. Possible outcomes:
+ * <ul>
+ *     <li>{@link net.shibboleth.idp.cas.flow.Events#Proceed proceed}</li>
+ *     <li>{@link net.shibboleth.idp.cas.protocol.ProtocolError#ServiceNotSpecified serviceNotSpecified}</li>
+ * </ul>
+ * On success places a {@link ServiceTicketRequest} object in request scope under the key
+ * {@value FlowStateSupport#SERVICE_TICKET_REQUEST_KEY}.
  *
  * @author Marvin S. Addison
  */
@@ -29,7 +33,7 @@ public class InitializeLoginAction extends AbstractProfileAction<ServiceTicketRe
         final ParameterMap params = springRequestContext.getRequestParameters();
         final String service = params.get(ProtocolParam.Service.id());
         if (service == null) {
-            return ActionSupport.buildEvent(this, "error");
+            return ProtocolError.ServiceNotSpecified.event(this);
         }
         final ServiceTicketRequest serviceTicketRequest = new ServiceTicketRequest(service);
 
@@ -49,6 +53,6 @@ public class InitializeLoginAction extends AbstractProfileAction<ServiceTicketRe
         messageContext.setMessage(serviceTicketRequest);
         profileRequestContext.setInboundMessageContext(messageContext);
         FlowStateSupport.setServiceTicketRequest(springRequestContext, serviceTicketRequest);
-        return ActionSupport.buildEvent(profileRequestContext, Events.Proceed.id());
+        return Events.Proceed.event(this);
     }
 }

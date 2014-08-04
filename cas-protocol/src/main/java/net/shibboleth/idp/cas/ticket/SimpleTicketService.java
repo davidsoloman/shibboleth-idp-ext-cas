@@ -191,7 +191,7 @@ public class SimpleTicketService implements TicketService {
     @Nonnull
     @Override
     public ProxyTicket createProxyTicket(
-            @Nonnull final ProxyGrantingTicket pgt, @Nonnull final String service, final boolean renew) {
+            @Nonnull final ProxyGrantingTicket pgt, @Nonnull final String service) {
         Constraint.isNotNull(pgt, "ProxyGrantingTicket cannot be null");
         Constraint.isNotNull(service, "Service cannot be null");
         final ProxyTicket pt = new ProxyTicket(
@@ -199,7 +199,6 @@ public class SimpleTicketService implements TicketService {
                 pgt.getSessionId(),
                 service,
                 DateTime.now().plus(proxyTicketValidityPeriod).toInstant(),
-                renew,
                 pgt.getId());
         store(pt);
         return pt;

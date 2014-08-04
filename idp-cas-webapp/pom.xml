@@ -15,6 +15,16 @@
         <jetty.src>${basedir}/src/main/jetty</jetty.src>
     </properties>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>shib-snapshot</id>
+            <url>https://build.shibboleth.net/nexus/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+
     <groupId>net.shibboleth</groupId>
     <artifactId>idp-cas-webapp</artifactId>
     <packaging>war</packaging>

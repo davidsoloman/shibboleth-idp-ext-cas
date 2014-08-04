@@ -1,6 +1,6 @@
 #include("cas/header.vm")
   <cas:authenticationSuccess>
-    <cas:user>$escapeUtils.escapeXml($username)</cas:user>
+    <cas:user>$escapeUtils.escapeXml($userName)</cas:user>
     #if($pgtIou)<cas:proxyGrantingTicket>$pgtIou</cas:proxyGrantingTicket>#end
   </cas:authenticationSuccess>
 #include("cas/footer.vm")

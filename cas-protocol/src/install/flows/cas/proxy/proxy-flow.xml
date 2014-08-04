@@ -19,46 +19,44 @@
 <flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
 
-    <action-state id="initializeValidate">
+    <action-state id="initializeProxy">
         <evaluate expression="initProfileRequestContext"/>
-        <evaluate expression="initializeValidateAction" />
-        <transition on="serviceNotSpecified" to="serviceValidateFailure" />
-        <transition on="ticketNotSpecified" to="serviceValidateFailure" />
-        <transition on="proceed" to="validateServiceTicket" />
+        <evaluate expression="initializeProxyAction" />
+        <transition on="serviceNotSpecified" to="proxyFailure" />
+        <transition on="ticketNotSpecified" to="proxyFailure" />
+        <transition on="proceed" to="grantProxyTicket" />
     </action-state>
 
-    <action-state id="validateServiceTicket">
-        <evaluate expression="validateServiceTicketAction" />
-        <transition on="serviceMismatch" to="serviceValidateFailure" />
-        <transition on="ticketExpired" to="serviceValidateFailure" />
-        <transition on="ticketNotFromRenew" to="serviceValidateFailure" />
-        <transition on="ticketRetrievalError" to="serviceValidateFailure" />
+    <action-state id="grantProxyTicket">
+        <evaluate expression="grantProxyTicketAction" />
+        <transition on="serviceMismatch" to="proxyFailure" />
+        <transition on="sessionExpired" to="proxyFailure" />
+        <transition on="ticketCreationError" to="proxyFailure" />
+        <transition on="ticketRetrievalError" to="proxyFailure" />
         <transition on="success" to="validateIdPSession" />
     </action-state>
 
     <action-state id="validateIdPSession">
         <evaluate expression="validateIdPSessionAction" />
-        <transition on="sessionRetrievalError" to="serviceValidateFailure" />
-        <transition on="sessionExpired" to="serviceValidateFailure" />
-        <transition on="success" to="serviceValidateSuccess" />
+        <transition on="sessionRetrievalError" to="proxyFailure" />
+        <transition on="sessionExpired" to="proxyFailure" />
+        <transition on="success" to="proxySuccess" />
     </action-state>
 
     <!-- View end states -->
-    <end-state id="serviceValidateSuccess" view="cas/serviceValidateSuccess">
+    <end-state id="proxySuccess" view="cas/proxySuccess">
         <on-entry>
-            <evaluate expression="requestScope.serviceTicketValidationResponse.setUserName(requestScope.idpSession.principalName)" />
-            <set name="flashScope.userName" value="requestScope.serviceTicketValidationResponse.userName" />
-            <set name="flashScope.pgtIou" value="requestScope.serviceTicketValidationResponse.pgtIou" />
+            <set name="flashScope.pt" value="requestScope.proxyResponse.pt" />
             <set name="flashScope.escapeUtils" value="T(org.apache.commons.lang.StringEscapeUtils)" />
         </on-entry>
     </end-state>
-    <end-state id="serviceValidateFailure" view="cas/serviceValidateFailure">
+    <end-state id="proxyFailure" view="cas/proxyFailure">
         <on-entry>
             <set name="flashScope.code" value="currentEvent.attributes.code" />
             <set name="flashScope.detailCode" value="currentEvent.attributes.detailCode" />
         </on-entry>
     </end-state>
 
-    <bean-import resource="serviceValidate-beans.xml" />
+    <bean-import resource="proxy-beans.xml" />
 
 </flow>

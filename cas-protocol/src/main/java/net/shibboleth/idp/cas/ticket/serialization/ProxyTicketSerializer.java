@@ -19,7 +19,6 @@ public class ProxyTicketSerializer extends AbstractTicketSerializer<ProxyTicket>
                 ticket.getSessionId(),
                 ticket.getService(),
                 String.valueOf(ticket.getExpirationInstant().getMillis()),
-                String.valueOf(ticket.isRenew()),
                 ticket.getPgtId(),
         };
     }
@@ -27,15 +26,14 @@ public class ProxyTicketSerializer extends AbstractTicketSerializer<ProxyTicket>
     @Override
     @Nonnull
     protected ProxyTicket createTicket(@Nonnull final String id, @NotEmpty final String[] fields) {
-        if (fields.length != 5) {
-            throw new IllegalArgumentException("Expected 5 fields but got " + fields.length);
+        if (fields.length != 4) {
+            throw new IllegalArgumentException("Expected 4 fields but got " + fields.length);
         }
         return new ProxyTicket(
                 id,
                 fields[0],
                 fields[1],
                 new Instant(Long.valueOf(fields[2])),
-                Boolean.parseBoolean(fields[3]),
-                fields[4]);
+                fields[3]);
     }
 }

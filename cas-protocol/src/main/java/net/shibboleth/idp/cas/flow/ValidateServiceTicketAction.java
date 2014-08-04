@@ -10,16 +10,11 @@ import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.ServiceTicketValidationResponse;
 import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.cas.ticket.ServiceTicket;
+import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.ActionSupport;
-import net.shibboleth.idp.session.IdPSession;
-import net.shibboleth.idp.session.SessionException;
-import net.shibboleth.idp.session.SessionResolver;
-import net.shibboleth.idp.session.criterion.SessionIdCriterion;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -31,13 +26,11 @@ import org.springframework.webflow.execution.RequestContext;
  * CAS protocol service ticket validation action emits one of the following events based on validation result:
  *
  * <ul>
+ *     <li>{@link Events#Success success}</li>
  *     <li>{@link ProtocolError#ServiceMismatch serviceMismatch}</li>
- *     <li>{@link ProtocolError#SessionExpired sessionExpired}</li>
- *     <li>{@link ProtocolError#SessionRetrievalError sessionRetrievalError}</li>
  *     <li>{@link ProtocolError#TicketExpired ticketExpired}</li>
  *     <li>{@link ProtocolError#TicketNotFromRenew ticketNotFromRenew}</li>
  *     <li>{@link ProtocolError#TicketRetrievalError ticketRetrievalError}</li>
- *     <li>{@link Events#Success success}</li>
  * </ul>
  *
  * <p>
@@ -55,9 +48,6 @@ public class ValidateServiceTicketAction
     /** Manages CAS tickets. */
     @Nonnull private TicketService ticketService;
 
-    /** Looks up IdP sessions. */
-    @Nonnull private SessionResolver sessionResolver;
-
     /** Performs proxy authentication. */
     @Nonnull private Authenticator<URI, ProxyIdentifiers> proxyAuthenticator;
 
@@ -66,9 +56,6 @@ public class ValidateServiceTicketAction
         this.ticketService = Constraint.isNotNull(ticketService, "Ticket service cannot be null.");
     }
 
-    public void setSessionResolver(@Nonnull final SessionResolver resolver) {
-        this.sessionResolver = Constraint.isNotNull(resolver, "Session resolver cannot be null.");
-    }
 
     public void setProxyAuthenticator(@Nonnull final Authenticator<URI, ProxyIdentifiers> proxyAuthenticator) {
         this.proxyAuthenticator = Constraint.isNotNull(proxyAuthenticator, "Proxy authenticator cannot be null.");
@@ -100,27 +87,8 @@ public class ValidateServiceTicketAction
         if (ticket == null || ticket.getExpirationInstant().isBeforeNow()) {
             return ProtocolError.TicketExpired.event(this);
         }
+        profileRequestContext.addSubcontext(new TicketContext(ticket));
 
-        final IdPSession session;
-        try {
-            session = sessionResolver.resolveSingle(new CriteriaSet(new SessionIdCriterion(ticket.getSessionId())));
-        } catch (ResolverException e) {
-            log.debug("IdP session retrieval failed with error: {}", e);
-            return ProtocolError.SessionRetrievalError.event(this);
-        }
-        boolean expired = (session == null);
-        if (session != null) {
-            try {
-                expired = !session.checkTimeout();
-                log.debug("IdP session expired={}", expired);
-            } catch (SessionException e) {
-                log.debug("Error performing session timeout check. Assuming session has expired.", e);
-                expired = true;
-            }
-        }
-        if (expired) {
-            return ProtocolError.SessionExpired.event(this);
-        }
         if (!ticket.getService().equalsIgnoreCase(request.getService())) {
             log.debug("Service issued for {} does not match {}", ticket.getService(), request.getService());
             return ProtocolError.ServiceMismatch.event(this);
@@ -129,7 +97,7 @@ public class ValidateServiceTicketAction
             log.debug("Renew=true requested at validation time but ticket not issued with renew=true.");
             return ProtocolError.TicketNotFromRenew.event(this);
         }
-        final ServiceTicketValidationResponse response = new ServiceTicketValidationResponse(session.getPrincipalName());
+        final ServiceTicketValidationResponse response = new ServiceTicketValidationResponse();
         FlowStateSupport.setServiceTicketValidationResponse(springRequestContext, response);
         if (request.getPgtUrl() != null) {
             try {
@@ -142,6 +110,6 @@ public class ValidateServiceTicketAction
             }
         }
         log.info("Successfully validated {} for {}", request.getTicket(), request.getService());
-        return new Event(this, Events.Success.id());
+        return Events.Success.event(this);
     }
 }

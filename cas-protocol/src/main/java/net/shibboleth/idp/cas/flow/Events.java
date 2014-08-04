@@ -17,6 +17,8 @@
 
 package net.shibboleth.idp.cas.flow;
 
+import org.springframework.webflow.execution.Event;
+
 /**
  * CAS protocol flow event identifiers.
  *
@@ -52,5 +54,17 @@ public enum Events {
      */
     public String id() {
         return this.name().substring(0, 1).toLowerCase() + this.name().substring(1);
+    }
+
+
+    /**
+     * Creates a Spring webflow event whose ID is given by {@link #id()}.
+     *
+     * @param source Event source.
+     *
+     * @return Spring webflow event.
+     */
+    public Event event(final Object source) {
+        return new Event(source, id());
     }
 }

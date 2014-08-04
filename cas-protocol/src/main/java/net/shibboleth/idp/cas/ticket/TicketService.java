@@ -73,11 +73,10 @@ public interface TicketService {
      *
      * @param pgt Proxy-granting ticket used to create proxy ticket.
      * @param service Service for which ticket is granted.
-     * @param renew True to indicate the ticket was generated in response to a forced authentication, false otherwise.
      *
      * @return Created proxy ticket.
      */
-    @Nonnull ProxyTicket createProxyTicket(@Nonnull ProxyGrantingTicket pgt, @Nonnull String service, boolean renew);
+    @Nonnull ProxyTicket createProxyTicket(@Nonnull ProxyGrantingTicket pgt, @Nonnull String service);
 
     /**
      * Removes the proxy ticket with the given identifier.

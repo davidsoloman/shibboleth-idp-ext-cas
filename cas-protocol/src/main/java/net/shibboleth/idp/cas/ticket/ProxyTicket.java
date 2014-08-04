@@ -10,7 +10,7 @@ import org.joda.time.Instant;
  *
  * @author Marvin S. Addison
  */
-public class ProxyTicket extends ServiceTicket {
+public class ProxyTicket extends Ticket {
 
     /** Proxy-granting ticket used to create ticket. */
     @Nonnull private final String pgtId;
@@ -22,7 +22,6 @@ public class ProxyTicket extends ServiceTicket {
      * @param sessionId IdP session ID used to create ticket.
      * @param service Service that requested the ticket.
      * @param expiration Expiration instant.
-     * @param renew True if ticket was issued from forced authentication, false otherwise.
      * @param pgtId Proxy-granting ticket ID used to create ticket.
      */
     public ProxyTicket(
@@ -30,9 +29,8 @@ public class ProxyTicket extends ServiceTicket {
             @Nonnull final String sessionId,
             @Nonnull final String service,
             @Nonnull final Instant expiration,
-            final boolean renew,
             @Nonnull final String pgtId) {
-        super(id, sessionId, service, expiration, renew);
+        super(id, sessionId, service, expiration);
         this.pgtId = Constraint.isNotNull(pgtId, "PgtId cannot be null");
     }
 

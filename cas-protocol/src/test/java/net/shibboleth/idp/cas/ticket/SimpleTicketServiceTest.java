@@ -61,7 +61,7 @@ public class SimpleTicketServiceTest extends AbstractTestNGSpringContextTests {
         assertNotNull(st);
         final ProxyGrantingTicket pgt = ticketService.createProxyGrantingTicket(st, TEST_SERVICE);
         assertNotNull(pgt);
-        final ProxyTicket pt = ticketService.createProxyTicket(pgt, TEST_SERVICE, true);
+        final ProxyTicket pt = ticketService.createProxyTicket(pgt, TEST_SERVICE);
         assertNotNull(pt);
         assertEquals(ticketService.removeProxyTicket(pt.getId()), pt);
         assertNull(ticketService.removeProxyTicket(pt.getId()));

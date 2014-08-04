@@ -61,4 +61,8 @@
     <bean id="initProfileRequestContext"
           class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" />
 
+    <bean id="validateIdPSessionAction"
+          class="net.shibboleth.idp.cas.flow.ValidateIdpSessionAction"
+          p:sessionResolver-ref="shibboleth.SessionManager" />
+
 </beans>

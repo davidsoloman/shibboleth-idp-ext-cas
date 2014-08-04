@@ -16,12 +16,9 @@
  */
 package net.shibboleth.idp.cas.flow;
 
-import javax.annotation.Nonnull;
-
-import net.shibboleth.idp.cas.protocol.ProtocolError;
-import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
-import net.shibboleth.idp.cas.protocol.ServiceTicketResponse;
-import net.shibboleth.idp.cas.ticket.ServiceTicket;
+import net.shibboleth.idp.cas.protocol.*;
+import net.shibboleth.idp.cas.ticket.ProxyGrantingTicket;
+import net.shibboleth.idp.cas.ticket.ProxyTicket;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.session.context.SessionContext;
@@ -32,21 +29,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 
+import javax.annotation.Nonnull;
+
 /**
- * Generates and stores a CAS protocol service ticket. Possible outcomes:
+ * Generates and stores a CAS protocol proxy ticket. Possible outcomes:
  * <ul>
  *     <li>{@link net.shibboleth.idp.cas.flow.Events#Success success}</li>
+ *     <li>{@link net.shibboleth.idp.cas.protocol.ProtocolError#TicketRetrievalError ticketRetrievalError}</li>
  *     <li>{@link net.shibboleth.idp.cas.protocol.ProtocolError#TicketCreationError ticketCreationError}</li>
  * </ul>
- * In the success case a {@link ServiceTicketResponse} message is created and stored
- * as request scope parameter under the key {@value FlowStateSupport#SERVICE_TICKET_RESPONSE_KEY}.
+ * In the success case a {@link net.shibboleth.idp.cas.protocol.ProxyTicketResponse} message is created and stored
+ * as request scope parameter under the key {@value net.shibboleth.idp.cas.flow.FlowStateSupport#PROXY_TICKET_RESPONSE_KEY}.
  *
  * @author Marvin S. Addison
  */
-public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicketRequest, ServiceTicketRequest> {
+public class GrantProxyTicketAction extends AbstractProfileAction<ProxyTicketRequest, ProxyTicketResponse> {
 
     /** Class logger. */
-    private final Logger log = LoggerFactory.getLogger(GrantServiceTicketAction.class);
+    private final Logger log = LoggerFactory.getLogger(GrantProxyTicketAction.class);
 
     /** Manages CAS tickets. */
     @Nonnull private TicketService ticketService;
@@ -61,26 +61,31 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
     @Override
     protected Event doExecute(
             final @Nonnull RequestContext springRequestContext,
-            final @Nonnull ProfileRequestContext<ServiceTicketRequest, ServiceTicketRequest> profileRequestContext) {
+            final @Nonnull ProfileRequestContext<ProxyTicketRequest, ProxyTicketResponse> profileRequestContext) {
 
-        final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(springRequestContext);
+        final ProxyTicketRequest request = FlowStateSupport.getProxyTicketRequest(springRequestContext);
         final SessionContext sessionCtx = profileRequestContext.getSubcontext(SessionContext.class, false);
         if (sessionCtx == null || sessionCtx.getIdPSession() == null) {
             throw new IllegalStateException("Cannot locate IdP session");
         }
-        final ServiceTicket ticket;
+        final ProxyGrantingTicket pgt;
         try {
-            log.debug("Granting service ticket for {}", request.getService());
-            ticket = ticketService.createServiceTicket(
-                    sessionCtx.getIdPSession().getId(), request.getService(), request.isRenew());
+            log.debug("Fetching proxy-granting ticket {}", request.getPgt());
+            pgt = ticketService.fetchProxyGrantingTicket(request.getPgt());
         } catch (RuntimeException e) {
-            log.error("Failed granting service ticket due to error.", e);
+            log.error("Failed looking up " + request.getPgt(), e);
+            return ProtocolError.TicketRetrievalError.event(this);
+        }
+        final ProxyTicket pt;
+        try {
+            log.debug("Granting proxy ticket for {}", request.getTargetService());
+            pt = ticketService.createProxyTicket(pgt, request.getTargetService());
+        } catch (RuntimeException e) {
+            log.error("Failed granting proxy ticket due to error.", e);
             return ProtocolError.TicketCreationError.event(this);
         }
-        log.info("Granted ticket for {}", request.getService());
-        FlowStateSupport.setServiceTicketResponse(
-                springRequestContext,
-                new ServiceTicketResponse(request.getService(), ticket.getId()));
-        return Events.Success.event(this);
+        log.info("Granted proxy ticket for {}", request.getTargetService());
+        FlowStateSupport.setProxyTicketResponse(springRequestContext, new ProxyTicketResponse(pt.getId()));
+        return new Event(this, Events.Success.id());
     }
 }

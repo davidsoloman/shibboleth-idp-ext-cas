@@ -5,7 +5,6 @@ import javax.annotation.Nonnull;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
@@ -22,14 +21,13 @@ public class BuildAuthenticationContextAction extends AbstractProfileAction<Serv
             final @Nonnull RequestContext springRequestContext,
             final @Nonnull ProfileRequestContext<ServiceTicketRequest, Object> profileRequestContext){
 
+        final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(springRequestContext);
         final AuthenticationContext ac = new AuthenticationContext();
-
-        final ServiceTicketRequest request = profileRequestContext.getInboundMessageContext().getMessage();
         ac.setForceAuthn(request.isRenew());
         ac.setIsPassive(false);
-        ac.setBrowserProfile(true);
 
         profileRequestContext.addSubcontext(ac, true);
-        return ActionSupport.buildEvent(this, Events.Proceed.id());
+        profileRequestContext.setBrowserProfile(true);
+        return Events.Proceed.event(this);
     }
 }

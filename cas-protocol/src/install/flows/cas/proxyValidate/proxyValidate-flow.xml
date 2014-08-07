@@ -36,7 +36,7 @@
         <transition on="ticketExpired" to="serviceValidateFailure" />
         <transition on="ticketRetrievalError" to="serviceValidateFailure" />
         <transition on="serviceTicketValidated" to="validateIdPSession" />
-        <transition on="proxyTicketValidated" to="invalidTicketType" />
+        <transition on="proxyTicketValidated" to="buildProxyChain" />
     </action-state>
 
     <action-state id="validateIdPSession">
@@ -61,13 +61,14 @@
 
     <action-state id="validateProxyCallback">
         <evaluate expression="validateProxyCallbackAction" />
+        <transition on="failure" to="serviceValidateFailure" />
         <transition on="success" to="serviceValidateSuccess" />
-        <transition on="failure" to="serviceValidateSuccess" />
     </action-state>
 
-    <action-state id="invalidTicketType">
-        <evaluate expression="T(net.shibboleth.idp.cas.protocol.ProtocolError).InvalidTicketType.event(this)" />
-        <transition to="serviceValidateFailure" />
+    <action-state id="buildProxyChain">
+        <evaluate expression="buildProxyChainAction" />
+        <transition on="invalidTicketType" to="serviceValidateFailure" />
+        <transition on="proceed" to="validateIdPSession" />
     </action-state>
 
     <!-- View end states -->
@@ -86,6 +87,6 @@
         </on-entry>
     </end-state>
 
-    <bean-import resource="serviceValidate-beans.xml" />
+    <bean-import resource="proxyValidate-beans.xml" />
 
 </flow>

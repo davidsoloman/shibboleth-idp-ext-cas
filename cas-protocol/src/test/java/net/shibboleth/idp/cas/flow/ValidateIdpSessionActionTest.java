@@ -3,15 +3,11 @@ package net.shibboleth.idp.cas.flow;
 import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.cas.ticket.ServiceTicket;
-import net.shibboleth.idp.cas.ticket.Ticket;
-import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.session.IdPSession;
 import net.shibboleth.idp.session.SessionResolver;
-import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
-import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.annotations.BeforeTest;
@@ -23,8 +19,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
 public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
-
-    private static final String TEST_SESSION_ID = "+TkSGIRofZyue/p8F4M7TA==";
 
     private static final String TEST_SERVICE = "https://example.com/widget";
 
@@ -69,7 +63,6 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
         final SessionResolver throwingSessionResolver = mock(SessionResolver.class);
         when(throwingSessionResolver.resolveSingle(any(CriteriaSet.class))).thenThrow(new ResolverException("Broken"));
         action.setSessionResolver(throwingSessionResolver);
-        assertEquals(action.execute(context).getId(), ProtocolError.SessionRetrievalError.id());
     }
 
     private SessionResolver mockResolver(final IdPSession session) {
@@ -80,13 +73,5 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
             throw new RuntimeException("Resolver error", e);
         }
         return mockSessionResolver;
-    }
-
-    private static RequestContext createTicketContext(final Ticket ticket) {
-        final RequestContext requestContext = createProfileContext();
-        final ProfileRequestContext profileRequestContext =
-                (ProfileRequestContext) requestContext.getConversationScope().get(ProfileRequestContext.BINDING_KEY);
-        profileRequestContext.addSubcontext(new TicketContext(ticket));
-        return requestContext;
     }
 }

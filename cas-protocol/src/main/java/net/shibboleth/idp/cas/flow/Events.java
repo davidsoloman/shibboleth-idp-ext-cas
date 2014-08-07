@@ -38,6 +38,12 @@ public enum Events {
     /** CAS protocol gateway flag specified to skip authentication. */
     GatewayRequested,
 
+    /** Successful service ticket validation. */
+    ServiceTicketValidated,
+
+    /** Successful proxy ticket validation. */
+    ProxyTicketValidated,
+
     /** Generic success event. */
     Success,
 

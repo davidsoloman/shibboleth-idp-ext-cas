@@ -9,6 +9,16 @@ import org.springframework.webflow.execution.Event;
  * @author Marvin S. Addison
  */
 public enum ProtocolError {
+
+    /** Ticket parameter provided but has invalid format. */
+    InvalidTicketFormat("INVALID_TICKET", "E_INVALID_TICKET_FORMAT"),
+
+    /** A valid ticket of an unsupported type was provided. */
+    InvalidTicketType("INVALID_TICKET", "E_INVALID_TICKET_TYPE"),
+
+    /** Unsupported condition where a proxy ticket validation occurs with the renew flag set. */
+    RenewIncompatibleWithProxy("INVALID_REQUEST", "E_RENEW_INCOMPATIBLE_WITH_PROXY"),
+
     /** Service parameter required but not specified. */
     ServiceNotSpecified("INVALID_REQUEST", "E_SERVICE_NOT_SPECIFIED"),
 

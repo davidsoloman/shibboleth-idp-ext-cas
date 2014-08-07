@@ -1,7 +1,6 @@
 package net.shibboleth.idp.cas.flow;
 
 import net.shibboleth.idp.cas.protocol.ProtocolError;
-import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.ActionSupport;
@@ -43,7 +42,7 @@ import javax.annotation.Nonnull;
 public class ValidateIdpSessionAction extends AbstractProfileAction {
 
     /** Class logger. */
-    private final Logger log = LoggerFactory.getLogger(ValidateServiceTicketAction.class);
+    private final Logger log = LoggerFactory.getLogger(ValidateTicketAction.class);
 
     /** Looks up IdP sessions. */
     @Nonnull private SessionResolver sessionResolver;

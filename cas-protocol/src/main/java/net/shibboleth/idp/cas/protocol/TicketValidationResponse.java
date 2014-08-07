@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,12 +16,14 @@ import java.util.Map;
  *
  * @author Marvin S. Addison
  */
-public class ServiceTicketValidationResponse {
+public class TicketValidationResponse {
     @Nonnull private String userName;
 
     @Nonnull private Map<String, List<String>> attributes = Collections.emptyMap();
 
     @Nullable private String pgtIou;
+
+    @Nonnull private List<String> proxies = new ArrayList<String>();
 
     @Nonnull public String getUserName() {
         return userName;
@@ -42,5 +45,19 @@ public class ServiceTicketValidationResponse {
 
     public void setPgtIou(@Nullable final String pgtIou) {
         this.pgtIou = StringSupport.trimOrNull(pgtIou);
+    }
+
+    /** @return Immutable list of proxies traversed in order of most recent to last recent. */
+    @Nonnull public List<String> getProxies() {
+        return Collections.unmodifiableList(proxies);
+    }
+
+    /**
+     * Adds a proxy to the list of proxies traversed.
+     *
+     * @param proxy Name of a proxying service, typically a URI.
+     */
+    public void addProxy(final String proxy) {
+        proxies.add(proxy);
     }
 }

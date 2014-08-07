@@ -1,5 +1,7 @@
 package net.shibboleth.idp.cas.flow;
 
+import net.shibboleth.idp.cas.ticket.Ticket;
+import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.session.IdPSession;
 import net.shibboleth.idp.session.SessionException;
@@ -31,10 +33,13 @@ import static org.mockito.Mockito.when;
             "/test/test-beans.xml",
             "/test/test-webflow-config.xml",
             "/flows/cas/login/login-beans.xml",
-            "/flows/cas/serviceValidate/serviceValidate-beans.xml"},
+            "/flows/cas/serviceValidate/serviceValidate-beans.xml",
+           "/flows/cas/proxyValidate/proxyValidate-beans.xml"},
         initializers = IdPPropertiesApplicationContextInitializer.class)
 @WebAppConfiguration
 public abstract class AbstractProfileActionTest extends AbstractTestNGSpringContextTests {
+
+    protected static final String TEST_SESSION_ID = "+TkSGIRofZyue/p8F4M7TA==";
 
     protected static final String TEST_PRINCIPAL_NAME = "omega";
 
@@ -73,5 +78,13 @@ public abstract class AbstractProfileActionTest extends AbstractTestNGSpringCont
             throw new RuntimeException("Session exception", e);
         }
         return mockSession;
+    }
+
+    protected static RequestContext createTicketContext(final Ticket ticket) {
+        final RequestContext requestContext = createProfileContext();
+        final ProfileRequestContext profileRequestContext =
+                (ProfileRequestContext) requestContext.getConversationScope().get(ProfileRequestContext.BINDING_KEY);
+        profileRequestContext.addSubcontext(new TicketContext(ticket));
+        return requestContext;
     }
 }

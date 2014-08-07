@@ -30,8 +30,8 @@ public final class FlowStateSupport {
     /** Name of flow attribute containing {@link TicketValidationRequest}. */
     public static final String TICKET_VALIDATION_REQUEST_KEY = "ticketValidationRequest";
 
-    /** Name of flow attribute containing {@link ServiceTicketValidationResponse}. */
-    public static final String SERVICE_TICKET_VALIDATION_RESPONSE_KEY = "serviceTicketValidationResponse";
+    /** Name of flow attribute containing {@link net.shibboleth.idp.cas.protocol.TicketValidationResponse}. */
+    public static final String TICKET_VALIDATION_RESPONSE_KEY = "ticketValidationResponse";
 
     /** Protected constructor of utility class. */
     private FlowStateSupport() {}
@@ -68,13 +68,13 @@ public final class FlowStateSupport {
         context.getRequestScope().put(TICKET_VALIDATION_REQUEST_KEY, request);
     }
 
-    public static ServiceTicketValidationResponse getServiceTicketValidationResponse(final RequestContext context) {
-        return (ServiceTicketValidationResponse) context.getRequestScope().get(SERVICE_TICKET_VALIDATION_RESPONSE_KEY);
+    public static TicketValidationResponse getTicketValidationResponse(final RequestContext context) {
+        return (TicketValidationResponse) context.getRequestScope().get(TICKET_VALIDATION_RESPONSE_KEY);
     }
 
-    public static void setServiceTicketValidationResponse(
-            final RequestContext context, final ServiceTicketValidationResponse response) {
-        context.getRequestScope().put(SERVICE_TICKET_VALIDATION_RESPONSE_KEY, response);
+    public static void setTicketValidationResponse(
+            final RequestContext context, final TicketValidationResponse response) {
+        context.getRequestScope().put(TICKET_VALIDATION_RESPONSE_KEY, response);
     }
 
     public static ProxyTicketRequest getProxyTicketRequest(final RequestContext context) {

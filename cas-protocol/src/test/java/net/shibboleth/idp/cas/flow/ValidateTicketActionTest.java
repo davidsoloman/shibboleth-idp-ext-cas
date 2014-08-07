@@ -12,21 +12,28 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 /**
- * Unit test for {@link ValidateServiceTicketAction} class.
+ * Unit test for {@link ValidateTicketAction} class.
  *
  * @author Marvin S. Addison
  */
-public class ValidateServiceTicketActionTest extends AbstractProfileActionTest {
-
-    private static final String TEST_SESSION_ID = "+TkSGIRofZyue/p8F4M7TA==";
+public class ValidateTicketActionTest extends AbstractProfileActionTest {
 
     private static final String TEST_SERVICE = "https://example.com/widget";
 
     @Autowired
-    private ValidateServiceTicketAction action;
+    private ValidateTicketAction action;
 
     @Autowired
     private TicketService ticketService;
+
+
+    @Test
+    public void testInvalidTicketFormat() throws Exception {
+        final RequestContext context = createProfileContext();
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, "AB-1234-012346abcdef");
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), ProtocolError.InvalidTicketFormat.id());
+    }
 
     @Test
     public void testServiceMismatch() throws Exception {
@@ -49,15 +56,6 @@ public class ValidateServiceTicketActionTest extends AbstractProfileActionTest {
     }
 
     @Test
-    public void testTicketNotFromRenew() throws Exception {
-        final RequestContext context = createProfileContext();
-        final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, true);
-        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
-        FlowStateSupport.setTicketValidationRequest(context, request);
-        assertEquals(action.execute(context).getId(), ProtocolError.TicketNotFromRenew.id());
-    }
-
-    @Test
     public void testTicketRetrievalError() throws Exception {
         final RequestContext context = createProfileContext();
         final TicketService throwingTicketService = mock(TicketService.class);
@@ -74,18 +72,7 @@ public class ValidateServiceTicketActionTest extends AbstractProfileActionTest {
         final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, false);
         final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
         FlowStateSupport.setTicketValidationRequest(context, request);
-        assertEquals(action.execute(context).getId(), Events.Success.id());
-        assertNotNull(FlowStateSupport.getServiceTicketValidationResponse(context));
-    }
-
-    @Test
-    public void testSuccessWithRenew() throws Exception {
-        final RequestContext context = createProfileContext();
-        final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, true);
-        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
-        request.setRenew(true);
-        FlowStateSupport.setTicketValidationRequest(context, request);
-        assertEquals(action.execute(context).getId(), Events.Success.id());
-        assertNotNull(FlowStateSupport.getServiceTicketValidationResponse(context));
+        assertEquals(action.execute(context).getId(), Events.ServiceTicketValidated.id());
+        assertNotNull(FlowStateSupport.getTicketValidationResponse(context));
     }
 }

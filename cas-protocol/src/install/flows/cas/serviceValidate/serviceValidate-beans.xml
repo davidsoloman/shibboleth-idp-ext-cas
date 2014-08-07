@@ -56,8 +56,15 @@
     <bean id="initializeValidateAction"
           class="net.shibboleth.idp.cas.flow.InitializeValidateAction" />
 
-    <bean id="validateServiceTicketAction"
-          class="net.shibboleth.idp.cas.flow.ValidateServiceTicketAction"
+    <bean id="validateTicketAction"
+          class="net.shibboleth.idp.cas.flow.ValidateTicketAction"
+          p:ticketService-ref="cas.ticketService" />
+
+    <bean id="validateRenewAction"
+          class="net.shibboleth.idp.cas.flow.ValidateRenewAction" />
+
+    <bean id="validateProxyCallbackAction"
+          class="net.shibboleth.idp.cas.flow.ValidateProxyCallbackAction"
           p:ticketService-ref="cas.ticketService"
           p:proxyAuthenticator-ref="cas.proxyAuthenticator" />
 

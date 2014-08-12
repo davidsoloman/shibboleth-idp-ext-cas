@@ -75,6 +75,7 @@
         <on-entry>
             <evaluate expression="requestScope.ticketValidationResponse.setUserName(requestScope.idpSession.principalName)" />
             <set name="flashScope.userName" value="requestScope.ticketValidationResponse.userName" />
+            <set name="flashScope.attributes" value="requestScope.ticketValidationResponse.attributes" />
             <set name="flashScope.pgtIou" value="requestScope.ticketValidationResponse.pgtIou" />
             <set name="flashScope.escapeUtils" value="T(org.apache.commons.lang.StringEscapeUtils)" />
         </on-entry>

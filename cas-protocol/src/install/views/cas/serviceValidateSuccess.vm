@@ -1,6 +1,25 @@
 #include("cas/header.vm")
   <cas:authenticationSuccess>
     <cas:user>$escapeUtils.escapeXml($userName)</cas:user>
-    #if($pgtIou)<cas:proxyGrantingTicket>$pgtIou</cas:proxyGrantingTicket>#end
+    #if($pgtIou)
+      <cas:proxyGrantingTicket>$escapeUtils.escapeXml($pgtIou)</cas:proxyGrantingTicket>
+    #end
+    #if($attributes.size() > 0)
+      <cas:attributes>
+        #foreach($entry in $attributes)
+          #set($attr = $escapeUtils.escapeXml($entry.key))
+          #foreach($value in $entry.value)
+            <cas:$attr>$escapeUtils.escapeXml($value)</cas:$attr>
+          #end
+        #end
+      </cas:attributes>
+    #end
+    #if($proxies.size() > 0)
+      <cas:proxies>
+        #foreach($proxy in $proxies)
+          <cas:proxy>$escapeUtils.escapeXml($proxy)</cas:proxy>
+        #end
+      </cas:proxies>
+    #end
   </cas:authenticationSuccess>
 #include("cas/footer.vm")

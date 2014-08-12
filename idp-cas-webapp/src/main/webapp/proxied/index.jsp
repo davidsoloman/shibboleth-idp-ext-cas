@@ -1,6 +1,6 @@
 <jsp:directive.include file="/WEB-INF/jsp/include/header.jsp" />
 
-<h1>CAS Protected Area</h1>
+<h1>CAS Proxied Area</h1>
 
 <p>Authenticated username: <b>${sessionScope._const_cas_assertion_.principal.name}</b></p>
 
@@ -12,8 +12,5 @@
     </li>
   </c:forEach>
 </ul>
-<div class="big-buttons" style="margin-top:40px">
-  <a class="button" href="proxy.jsp">Proxy</a>
-</div>
 
 <jsp:directive.include file="/WEB-INF/jsp/include/footer.jsp" />

@@ -48,7 +48,7 @@ import org.springframework.webflow.execution.RequestContext;
 public class ValidateRenewAction extends AbstractProfileAction<TicketValidationRequest, TicketValidationResponse> {
 
     /** Class logger. */
-    private final Logger log = LoggerFactory.getLogger(ValidateProxyCallbackAction.class);
+    private final Logger log = LoggerFactory.getLogger(ValidateRenewAction.class);
 
 
     @Nonnull
@@ -74,7 +74,10 @@ public class ValidateRenewAction extends AbstractProfileAction<TicketValidationR
                 return ProtocolError.TicketNotFromRenew.event(this);
             }
         } else {
-            return ProtocolError.RenewIncompatibleWithProxy.event(this);
+            // Proxy ticket validation
+            if (request.isRenew()) {
+                return ProtocolError.RenewIncompatibleWithProxy.event(this);
+            }
         }
         return Events.Success.event(this);
     }

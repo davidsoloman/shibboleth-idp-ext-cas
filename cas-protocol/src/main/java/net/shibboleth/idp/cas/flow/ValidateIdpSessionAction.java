@@ -42,7 +42,7 @@ import javax.annotation.Nonnull;
 public class ValidateIdpSessionAction extends AbstractProfileAction {
 
     /** Class logger. */
-    private final Logger log = LoggerFactory.getLogger(ValidateTicketAction.class);
+    private final Logger log = LoggerFactory.getLogger(ValidateIdpSessionAction.class);
 
     /** Looks up IdP sessions. */
     @Nonnull private SessionResolver sessionResolver;

@@ -56,17 +56,18 @@ public class ValidateRenewActionTest extends AbstractProfileActionTest {
 
     @Test
     public void testRenewIncompatibleWithProxy() throws Exception {
-        final ServiceTicket st = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, true);
+        final ServiceTicket st = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, false);
         final ProxyGrantingTicket pgt = ticketService.createProxyGrantingTicket(st, "PGT-12345");
         final ProxyTicket pt = ticketService.createProxyTicket(pgt, "https://foo.example.org");
         final RequestContext context = createTicketContext(pt);
         final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, pt.getId());
+        request.setRenew(true);
         FlowStateSupport.setTicketValidationRequest(context, request);
         assertEquals(action.execute(context).getId(), ProtocolError.RenewIncompatibleWithProxy.id());
     }
 
     @Test
-    public void testSuccess() throws Exception {
+    public void testSuccessWithRenewAndServiceTicket() throws Exception {
         final ServiceTicket ticket = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, true);
         final RequestContext context = createTicketContext(ticket);
         final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
@@ -75,4 +76,14 @@ public class ValidateRenewActionTest extends AbstractProfileActionTest {
         assertEquals(action.execute(context).getId(), Events.Success.id());
     }
 
+    @Test
+    public void testSuccessWithoutRenewAndProxyTicket() throws Exception {
+        final ServiceTicket st = ticketService.createServiceTicket(TEST_SESSION_ID, TEST_SERVICE, false);
+        final ProxyGrantingTicket pgt = ticketService.createProxyGrantingTicket(st, "PGT-98765");
+        final ProxyTicket pt = ticketService.createProxyTicket(pgt, "https://foo.example.org");
+        final RequestContext context = createTicketContext(pt);
+        final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, pt.getId());
+        FlowStateSupport.setTicketValidationRequest(context, request);
+        assertEquals(action.execute(context).getId(), Events.Success.id());
+    }
 }

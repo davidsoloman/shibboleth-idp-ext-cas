@@ -22,10 +22,13 @@ import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.cas.protocol.ServiceTicketResponse;
 import net.shibboleth.idp.cas.ticket.ServiceTicket;
+import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.idp.profile.ActionSupport;
 import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +69,8 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
         final ServiceTicketRequest request = FlowStateSupport.getServiceTicketRequest(springRequestContext);
         final SessionContext sessionCtx = profileRequestContext.getSubcontext(SessionContext.class, false);
         if (sessionCtx == null || sessionCtx.getIdPSession() == null) {
-            throw new IllegalStateException("Cannot locate IdP session");
+            log.info("Cannot locate IdP session");
+            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
         }
         final ServiceTicket ticket;
         try {
@@ -77,7 +81,7 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
             log.error("Failed granting service ticket due to error.", e);
             return ProtocolError.TicketCreationError.event(this);
         }
-        log.info("Granted ticket for {}", request.getService());
+        log.info("Granted service ticket for {}", request.getService());
         FlowStateSupport.setServiceTicketResponse(
                 springRequestContext,
                 new ServiceTicketResponse(request.getService(), ticket.getId()));

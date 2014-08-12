@@ -26,8 +26,9 @@
     <import resource="../../../conf/cas-common-beans.xml" />
 
     <!-- Action beans -->
-    <bean id="initializeValidateAction"
-          class="net.shibboleth.idp.cas.flow.InitializeValidateAction" />
+    <bean id="initializeProxyAction"
+          class="net.shibboleth.idp.cas.flow.InitializeProxyAction"
+          p:ticketService-ref="cas.ticketService" />
 
     <bean id="grantProxyTicketAction"
           class="net.shibboleth.idp.cas.flow.GrantProxyTicketAction"

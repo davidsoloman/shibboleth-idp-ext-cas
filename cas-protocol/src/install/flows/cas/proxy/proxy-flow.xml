@@ -26,29 +26,27 @@
         <evaluate expression="initializeProxyAction" />
         <transition on="serviceNotSpecified" to="proxyFailure" />
         <transition on="ticketNotSpecified" to="proxyFailure" />
-        <transition on="proceed" to="grantProxyTicket" />
-    </action-state>
-
-    <action-state id="grantProxyTicket">
-        <evaluate expression="grantProxyTicketAction" />
-        <transition on="serviceMismatch" to="proxyFailure" />
-        <transition on="sessionExpired" to="proxyFailure" />
-        <transition on="ticketCreationError" to="proxyFailure" />
         <transition on="ticketRetrievalError" to="proxyFailure" />
-        <transition on="success" to="validateIdPSession" />
+        <transition on="proceed" to="validateIdPSession" />
     </action-state>
 
     <action-state id="validateIdPSession">
         <evaluate expression="validateIdPSessionAction" />
         <transition on="sessionRetrievalError" to="proxyFailure" />
         <transition on="sessionExpired" to="proxyFailure" />
+        <transition on="success" to="grantProxyTicket" />
+    </action-state>
+
+    <action-state id="grantProxyTicket">
+        <evaluate expression="grantProxyTicketAction" />
+        <transition on="ticketCreationError" to="proxyFailure" />
         <transition on="success" to="proxySuccess" />
     </action-state>
 
     <!-- View end states -->
     <end-state id="proxySuccess" view="cas/proxySuccess">
         <on-entry>
-            <set name="flashScope.pt" value="requestScope.proxyResponse.pt" />
+            <set name="flashScope.pt" value="requestScope.proxyTicketResponse.pt" />
             <set name="flashScope.escapeUtils" value="T(org.apache.commons.lang.StringEscapeUtils)" />
         </on-entry>
     </end-state>

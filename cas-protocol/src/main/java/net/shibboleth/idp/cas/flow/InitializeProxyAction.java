@@ -3,9 +3,15 @@ package net.shibboleth.idp.cas.flow;
 import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.ProtocolParam;
 import net.shibboleth.idp.cas.protocol.ProxyTicketRequest;
+import net.shibboleth.idp.cas.ticket.ProxyGrantingTicket;
+import net.shibboleth.idp.cas.ticket.TicketContext;
+import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.webflow.core.collection.ParameterMap;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
@@ -19,14 +25,29 @@ import javax.annotation.Nonnull;
  *     <li>{@link net.shibboleth.idp.cas.flow.Events#Proceed proceed}</li>
  *     <li>{@link net.shibboleth.idp.cas.protocol.ProtocolError#ServiceNotSpecified serviceNotSpecified}</li>
  *     <li>{@link net.shibboleth.idp.cas.protocol.ProtocolError#TicketNotSpecified ticketNotSpecified}</li>
+ *     <li>{@link net.shibboleth.idp.cas.protocol.ProtocolError#TicketRetrievalError ticketRetrievalError}</li>
  * </ul>
  *
  * On proceed places a {@link net.shibboleth.idp.cas.protocol.ProxyTicketRequest} object in request scope under the key
- * {@value net.shibboleth.idp.cas.flow.FlowStateSupport#PROXY_TICKET_REQUEST_KEY}.
+ * {@value net.shibboleth.idp.cas.flow.FlowStateSupport#PROXY_TICKET_REQUEST_KEY}. Also creates a {@link TicketContext}
+ * containing the PGT provided to the <code>/proxy</code> endpoint and places it under the
+ * {@link org.opensaml.profile.context.ProfileRequestContext}.
  *
  * @author Marvin S. Addison
  */
 public class InitializeProxyAction extends AbstractProfileAction {
+
+    /** Class logger. */
+    private final Logger log = LoggerFactory.getLogger(InitializeProxyAction.class);
+
+    /** Manages CAS tickets. */
+    @Nonnull private TicketService ticketService;
+
+
+    public void setTicketService(@Nonnull final TicketService ticketService) {
+        this.ticketService = Constraint.isNotNull(ticketService, "Ticket service cannot be null.");
+    }
+
     @Nonnull
     @Override
     protected Event doExecute(
@@ -47,6 +68,14 @@ public class InitializeProxyAction extends AbstractProfileAction {
         messageContext.setMessage(proxyTicketRequest);
         profileRequestContext.setInboundMessageContext(messageContext);
         FlowStateSupport.setProxyTicketRequest(springRequestContext, proxyTicketRequest);
+        try {
+            log.debug("Fetching proxy-granting ticket {}", proxyTicketRequest.getPgt());
+            profileRequestContext.addSubcontext(
+                    new TicketContext(ticketService.fetchProxyGrantingTicket(proxyTicketRequest.getPgt())));
+        } catch (RuntimeException e) {
+            log.error("Failed looking up " + proxyTicketRequest.getPgt(), e);
+            return ProtocolError.TicketRetrievalError.event(this);
+        }
         return Events.Proceed.event(this);
     }
 }

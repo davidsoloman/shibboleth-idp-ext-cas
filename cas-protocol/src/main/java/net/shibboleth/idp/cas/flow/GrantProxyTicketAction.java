@@ -19,10 +19,13 @@ package net.shibboleth.idp.cas.flow;
 import net.shibboleth.idp.cas.protocol.*;
 import net.shibboleth.idp.cas.ticket.ProxyGrantingTicket;
 import net.shibboleth.idp.cas.ticket.ProxyTicket;
+import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.idp.profile.ActionSupport;
 import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +38,6 @@ import javax.annotation.Nonnull;
  * Generates and stores a CAS protocol proxy ticket. Possible outcomes:
  * <ul>
  *     <li>{@link net.shibboleth.idp.cas.flow.Events#Success success}</li>
- *     <li>{@link net.shibboleth.idp.cas.protocol.ProtocolError#TicketRetrievalError ticketRetrievalError}</li>
  *     <li>{@link net.shibboleth.idp.cas.protocol.ProtocolError#TicketCreationError ticketCreationError}</li>
  * </ul>
  * In the success case a {@link net.shibboleth.idp.cas.protocol.ProxyTicketResponse} message is created and stored
@@ -64,18 +66,12 @@ public class GrantProxyTicketAction extends AbstractProfileAction<ProxyTicketReq
             final @Nonnull ProfileRequestContext<ProxyTicketRequest, ProxyTicketResponse> profileRequestContext) {
 
         final ProxyTicketRequest request = FlowStateSupport.getProxyTicketRequest(springRequestContext);
-        final SessionContext sessionCtx = profileRequestContext.getSubcontext(SessionContext.class, false);
-        if (sessionCtx == null || sessionCtx.getIdPSession() == null) {
-            throw new IllegalStateException("Cannot locate IdP session");
+        final TicketContext ticketContext = profileRequestContext.getSubcontext(TicketContext.class);
+        if (ticketContext == null) {
+            log.info("TicketContext not found in profile request context.");
+            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
         }
-        final ProxyGrantingTicket pgt;
-        try {
-            log.debug("Fetching proxy-granting ticket {}", request.getPgt());
-            pgt = ticketService.fetchProxyGrantingTicket(request.getPgt());
-        } catch (RuntimeException e) {
-            log.error("Failed looking up " + request.getPgt(), e);
-            return ProtocolError.TicketRetrievalError.event(this);
-        }
+        final ProxyGrantingTicket pgt = (ProxyGrantingTicket) ticketContext.getTicket();
         final ProxyTicket pt;
         try {
             log.debug("Granting proxy ticket for {}", request.getTargetService());

@@ -23,7 +23,8 @@
            http://www.springframework.org/schema/beans/spring-beans.xsd"
        default-init-method="initialize">
 
-    <import resource="../serviceValidate/serviceValidate-beans.xml" />
+    <import resource="../../../conf/cas-common-beans.xml" />
+    <import resource="../abstractValidate/abstractValidate-beans.xml" />
 
     <!-- Action beans -->
     <bean id="buildProxyChainAction"

@@ -17,55 +17,12 @@
   -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:c="http://www.springframework.org/schema/c"
-       xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
-           http://www.springframework.org/schema/util
-           http://www.springframework.org/schema/util/spring-util.xsd"
+           http://www.springframework.org/schema/beans/spring-beans.xsd"
        default-init-method="initialize">
 
     <import resource="../../../conf/cas-common-beans.xml" />
-
-    <bean id="cas.proxyAuthenticator" class="net.shibboleth.idp.cas.authn.PkixProxyAuthenticator"
-          c:pgtIdGenerator-ref="cas.proxyGrantingTicketIdGenerator"
-          c:pgtIouGenerator-ref="cas.proxyGrantingTicketIOUGenerator"
-          c:trustStore-ref="cas.proxyCallbackTrustStore"
-          c:hostnameVerifier-ref="cas.proxyHostnameVerifier" />
-
-    <bean id="cas.proxyCallbackTrustStoreResource"
-          class="org.cryptacular.io.FileResource"
-          c:file="%{cas.proxy.trustStorePath:%{idp.home}/creds/idp-tls.p12}" />
-
-    <bean id="cas.proxyCallbackTrustStoreFactory"
-          class="org.cryptacular.bean.KeyStoreFactoryBean"
-          p:resource-ref="cas.proxyCallbackTrustStoreResource"
-          p:type="%{cas.proxy.trustStoreType:PKCS12}"
-          p:password="%{cas.proxy.trustStorePassword:changeit}" />
-
-    <bean id="cas.proxyCallbackTrustStore"
-          factory-method="newInstance"
-          factory-bean="cas.proxyCallbackTrustStoreFactory" />
-
-    <util:constant id="cas.proxyHostnameVerifier"
-                   static-field="%{cas.proxy.hostnameVerifier:org.apache.http.conn.ssl.SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER}" />
-
-    <!-- Action beans -->
-    <bean id="initializeValidateAction"
-          class="net.shibboleth.idp.cas.flow.InitializeValidateAction" />
-
-    <bean id="validateTicketAction"
-          class="net.shibboleth.idp.cas.flow.ValidateTicketAction"
-          p:ticketService-ref="cas.ticketService" />
-
-    <bean id="validateRenewAction"
-          class="net.shibboleth.idp.cas.flow.ValidateRenewAction" />
-
-    <bean id="validateProxyCallbackAction"
-          class="net.shibboleth.idp.cas.flow.ValidateProxyCallbackAction"
-          p:ticketService-ref="cas.ticketService"
-          p:proxyAuthenticator-ref="cas.proxyAuthenticator" />
+    <import resource="../abstractValidate/abstractValidate-beans.xml" />
 
 </beans>

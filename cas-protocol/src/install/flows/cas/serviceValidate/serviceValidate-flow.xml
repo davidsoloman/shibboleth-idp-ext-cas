@@ -19,8 +19,10 @@
 <flow xmlns="http://www.springframework.org/schema/webflow"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="
-          http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+          http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd"
+      parent="cas/abstractValidate" >
 
+    <!-- Bootstrap action has to be at the "top" of the flow after this flow prepends itself to parent. -->
     <action-state id="initializeValidate">
         <evaluate expression="initProfileRequestContext"/>
         <evaluate expression="initializeValidateAction" />
@@ -29,63 +31,10 @@
         <transition on="proceed" to="validateTicket" />
     </action-state>
 
-    <action-state id="validateTicket">
-        <evaluate expression="validateTicketAction" />
-        <transition on="invalidTicketFormat" to="serviceValidateFailure" />
-        <transition on="serviceMismatch" to="serviceValidateFailure" />
-        <transition on="ticketExpired" to="serviceValidateFailure" />
-        <transition on="ticketRetrievalError" to="serviceValidateFailure" />
-        <transition on="serviceTicketValidated" to="validateIdPSession" />
-        <transition on="proxyTicketValidated" to="invalidTicketType" />
-    </action-state>
-
-    <action-state id="validateIdPSession">
-        <evaluate expression="validateIdPSessionAction" />
-        <transition on="sessionRetrievalError" to="serviceValidateFailure" />
-        <transition on="sessionExpired" to="serviceValidateFailure" />
-        <transition on="success" to="validateRenew" />
-    </action-state>
-
-    <action-state id="validateRenew">
-        <evaluate expression="validateRenewAction" />
-        <transition on="ticketNotFromRenew" to="serviceValidateFailure" />
-        <transition on="renewIncompatibleWithProxy" to="serviceValidateFailure" />
-        <transition on="success" to="checkForProxy" />
-    </action-state>
-
-    <decision-state id="checkForProxy">
-        <if test="requestScope.ticketValidationRequest.pgtUrl != null"
-            then="validateProxyCallback"
-            else="serviceValidateSuccess"/>
-    </decision-state>
-
-    <action-state id="validateProxyCallback">
-        <evaluate expression="validateProxyCallbackAction" />
-        <transition on="success" to="serviceValidateSuccess" />
-        <transition on="failure" to="serviceValidateSuccess" />
-    </action-state>
-
-    <action-state id="invalidTicketType">
-        <evaluate expression="T(net.shibboleth.idp.cas.protocol.ProtocolError).InvalidTicketType.event(this)" />
+    <action-state id="handleValidProxyTicket">
+        <evaluate expression="T(net.shibboleth.idp.cas.protocol.ProtocolError).InvalidTicketType.event(flowRequestContext.currentState)" />
         <transition to="serviceValidateFailure" />
     </action-state>
-
-    <!-- View end states -->
-    <end-state id="serviceValidateSuccess" view="cas/serviceValidateSuccess">
-        <on-entry>
-            <evaluate expression="requestScope.ticketValidationResponse.setUserName(requestScope.idpSession.principalName)" />
-            <set name="flashScope.userName" value="requestScope.ticketValidationResponse.userName" />
-            <set name="flashScope.attributes" value="requestScope.ticketValidationResponse.attributes" />
-            <set name="flashScope.pgtIou" value="requestScope.ticketValidationResponse.pgtIou" />
-            <set name="flashScope.escapeUtils" value="T(org.apache.commons.lang.StringEscapeUtils)" />
-        </on-entry>
-    </end-state>
-    <end-state id="serviceValidateFailure" view="cas/serviceValidateFailure">
-        <on-entry>
-            <set name="flashScope.code" value="currentEvent.attributes.code" />
-            <set name="flashScope.detailCode" value="currentEvent.attributes.detailCode" />
-        </on-entry>
-    </end-state>
 
     <bean-import resource="serviceValidate-beans.xml" />
 

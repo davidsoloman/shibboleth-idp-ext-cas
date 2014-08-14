@@ -6,10 +6,9 @@
     #end
     #if($attributes.size() > 0)
       <cas:attributes>
-        #foreach($entry in $attributes)
-          #set($attr = $escapeUtils.escapeXml($entry.key))
-          #foreach($value in $entry.value)
-            <cas:$attr>$escapeUtils.escapeXml($value)</cas:$attr>
+        #foreach($attr in $attributes.keySet())
+          #foreach($value in $attributes.get($attr))
+            <cas:$escapeUtils.escapeXml($attr)>$escapeUtils.escapeXml($value)</cas:$escapeUtils.escapeXml($attr)>
           #end
         #end
       </cas:attributes>

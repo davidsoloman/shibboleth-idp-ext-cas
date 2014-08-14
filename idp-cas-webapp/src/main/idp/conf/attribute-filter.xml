@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<afp:AttributeFilterPolicyGroup id="ShibbolethFilterPolicy"
+        xmlns:afp="urn:mace:shibboleth:2.0:afp"
+        xmlns:basic="urn:mace:shibboleth:2.0:afp:mf:basic" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:mace:shibboleth:2.0:afp http://shibboleth.net/schema/idp/shibboleth-afp.xsd
+                            urn:mace:shibboleth:2.0:afp:mf:basic http://shibboleth.net/schema/idp/shibboleth-afp-mf-basic.xsd">
+
+
+    <afp:AttributeFilterPolicy id="releaseAttributesToDemo">
+        <afp:PolicyRequirementRule xsi:type="basic:AttributeRequesterRegex" regex="^https://localhost:8443/demo/.*" />
+
+        <afp:AttributeRule attributeID="uid">
+            <afp:PermitValueRule xsi:type="basic:ANY" />
+        </afp:AttributeRule>
+
+        <afp:AttributeRule attributeID="eduPersonAffiliation">
+            <afp:PermitValueRule xsi:type="basic:ANY" />
+        </afp:AttributeRule>
+
+        <afp:AttributeRule attributeID="email">
+            <afp:PermitValueRule xsi:type="basic:ANY" />
+        </afp:AttributeRule>
+
+    </afp:AttributeFilterPolicy>
+
+</afp:AttributeFilterPolicyGroup>

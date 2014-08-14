@@ -13,6 +13,9 @@
     <!-- IdP session management -->
     <logger name="net.shibboleth.idp.session" level="DEBUG"/>
 
+    <!-- IdP attribute engine -->
+    <logger name="net.shibboleth.idp.attribute" level="DEBUG"/>
+
     <!-- CAS protocol logging-->
     <logger name="net.shibboleth.idp.cas" level="DEBUG"/>
 

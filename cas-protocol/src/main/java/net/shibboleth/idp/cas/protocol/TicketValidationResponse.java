@@ -6,10 +6,7 @@ import javax.annotation.Nullable;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Service ticket validation response protocol message.
@@ -19,7 +16,7 @@ import java.util.Map;
 public class TicketValidationResponse {
     @Nonnull private String userName;
 
-    @Nonnull private Map<String, List<String>> attributes = Collections.emptyMap();
+    @Nonnull private Map<String, List<String>> attributes = new HashMap<>();
 
     @Nullable private String pgtIou;
 
@@ -37,6 +34,20 @@ public class TicketValidationResponse {
     /** @return Immutable map of user attributes. */
     public Map<String, List<String>> getAttributes() {
         return Collections.unmodifiableMap(attributes);
+    }
+
+    /**
+     * Adds an attribute to the attribute mapping.
+     *
+     * @param proxy Name of a proxying service, typically a URI.
+     */
+    public void addAttribute(final String name, final String value) {
+        List<String> values = attributes.get(name);
+        if (values == null) {
+            values = new ArrayList<>();
+            attributes.put(name, values);
+        }
+        values.add(value);
     }
 
     @Nullable public String getPgtIou() {

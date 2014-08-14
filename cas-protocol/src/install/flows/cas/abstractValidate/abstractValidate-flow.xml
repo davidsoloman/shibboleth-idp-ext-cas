@@ -57,13 +57,22 @@
     <decision-state id="checkForProxy">
         <if test="requestScope.ticketValidationRequest.pgtUrl != null"
             then="validateProxyCallback"
-            else="serviceValidateSuccess"/>
+            else="resolveAttributes"/>
     </decision-state>
 
     <action-state id="validateProxyCallback">
         <evaluate expression="validateProxyCallbackAction" />
-        <transition on="success" to="serviceValidateSuccess" />
-        <transition on="failure" to="serviceValidateSuccess" />
+        <transition on="success" to="resolveAttributes" />
+        <transition on="failure" to="resolveAttributes" />
+    </action-state>
+
+    <action-state id="resolveAttributes">
+        <evaluate expression="buildRelyingPartyContextAction" />
+        <evaluate expression="resolveAttributes" />
+        <evaluate expression="filterAttributes" />
+        <evaluate expression="extractAttributesAction" />
+        <evaluate expression="'finished'" />
+        <transition on="finished" to="serviceValidateSuccess" />
     </action-state>
 
     <!-- View end states -->

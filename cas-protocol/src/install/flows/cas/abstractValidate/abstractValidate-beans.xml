@@ -66,4 +66,20 @@
           p:ticketService-ref="cas.ticketService"
           p:proxyAuthenticator-ref="cas.proxyAuthenticator" />
 
+    <bean id="buildRelyingPartyContextAction"
+          class="net.shibboleth.idp.cas.flow.BuildRelyingPartyContextAction" />
+
+    <bean id="resolveAttributes"
+          class="net.shibboleth.idp.profile.impl.ResolveAttributes"
+          scope="prototype"
+          c:resolverService-ref="shibboleth.AttributeResolverService" />
+
+    <bean id="filterAttributes"
+          class="net.shibboleth.idp.profile.impl.FilterAttributes"
+          scope="prototype"
+          c:filterService-ref="shibboleth.AttributeFilterService" />
+
+    <bean id="extractAttributesAction"
+          class="net.shibboleth.idp.cas.flow.ExtractAttributesAction" />
+
 </beans>

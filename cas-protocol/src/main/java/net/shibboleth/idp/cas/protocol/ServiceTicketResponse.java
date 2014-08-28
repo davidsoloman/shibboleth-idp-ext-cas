@@ -53,7 +53,7 @@ public class ServiceTicketResponse {
     public String getRedirectUrl() {
         final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(service);
         if (saml) {
-            builder.queryParam(SamlParam.SAMLArt.name(), ticket);
+            builder.queryParam(SamlParam.SAMLart.name(), ticket);
         } else {
             builder.queryParam(ProtocolParam.Ticket.id(), ticket);
         }

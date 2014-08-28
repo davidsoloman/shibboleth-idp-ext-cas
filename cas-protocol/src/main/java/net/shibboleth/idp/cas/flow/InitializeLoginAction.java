@@ -34,13 +34,16 @@ public class InitializeLoginAction extends AbstractProfileAction<ServiceTicketRe
 
         final ParameterMap params = springRequestContext.getRequestParameters();
         String service = params.get(ProtocolParam.Service.id());
+        boolean isSaml = false;
         if (service == null) {
             service = params.get(SamlParam.TARGET.name());
             if (service == null) {
                 return ProtocolError.ServiceNotSpecified.event(this);
             }
+            isSaml = true;
         }
         final ServiceTicketRequest serviceTicketRequest = new ServiceTicketRequest(service);
+        serviceTicketRequest.setSaml(isSaml);
 
         final String renew = params.get(ProtocolParam.Renew.id());
         if (renew != null) {

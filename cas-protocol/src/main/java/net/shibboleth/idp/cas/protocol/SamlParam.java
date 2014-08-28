@@ -26,6 +26,6 @@ public enum SamlParam {
     /** TARGET parameter used to convey service URL. */
     TARGET,
 
-    /** SAMLArt parameter used to convey service ticket. */
-    SAMLArt;
+    /** SAMLart parameter used to convey service ticket. */
+    SAMLart;
 }

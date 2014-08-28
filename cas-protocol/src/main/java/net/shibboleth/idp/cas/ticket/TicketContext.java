@@ -1,3 +1,7 @@
+/*
+ * See LICENSE for licensing and NOTICE for copyright.
+ */
+
 package net.shibboleth.idp.cas.ticket;
 
 import net.shibboleth.utilities.java.support.logic.Constraint;

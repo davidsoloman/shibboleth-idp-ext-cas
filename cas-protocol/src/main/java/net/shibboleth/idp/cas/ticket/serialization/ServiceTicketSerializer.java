@@ -1,3 +1,7 @@
+/*
+ * See LICENSE for licensing and NOTICE for copyright.
+ */
+
 package net.shibboleth.idp.cas.ticket.serialization;
 
 import javax.annotation.Nonnull;

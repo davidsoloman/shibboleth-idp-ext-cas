@@ -1,6 +1,9 @@
+/*
+ * See LICENSE for licensing and NOTICE for copyright.
+ */
+
 package net.shibboleth.idp.cas.authn;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;

@@ -1,3 +1,7 @@
+/*
+ * See LICENSE for licensing and NOTICE for copyright.
+ */
+
 package net.shibboleth.idp.cas.flow;
 
 import net.shibboleth.idp.cas.ticket.Ticket;

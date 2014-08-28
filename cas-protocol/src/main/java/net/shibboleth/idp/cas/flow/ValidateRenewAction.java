@@ -60,12 +60,12 @@ public class ValidateRenewAction extends AbstractProfileAction<TicketValidationR
         final TicketValidationRequest request = FlowStateSupport.getTicketValidationRequest(springRequestContext);
         if (request == null) {
             log.info("TicketValidationRequest not found in flow state.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         final TicketContext ticketContext = profileRequestContext.getSubcontext(TicketContext.class);
         if (ticketContext == null) {
             log.info("TicketContext not found in profile request context.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         final Ticket ticket = ticketContext.getTicket();
         if (ticket instanceof ServiceTicket) {

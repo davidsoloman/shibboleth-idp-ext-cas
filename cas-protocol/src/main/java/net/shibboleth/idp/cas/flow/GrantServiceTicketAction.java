@@ -70,7 +70,7 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
         final SessionContext sessionCtx = profileRequestContext.getSubcontext(SessionContext.class, false);
         if (sessionCtx == null || sessionCtx.getIdPSession() == null) {
             log.info("Cannot locate IdP session");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         final ServiceTicket ticket;
         try {
@@ -82,9 +82,11 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
             return ProtocolError.TicketCreationError.event(this);
         }
         log.info("Granted service ticket for {}", request.getService());
-        FlowStateSupport.setServiceTicketResponse(
-                springRequestContext,
-                new ServiceTicketResponse(request.getService(), ticket.getId()));
+        final ServiceTicketResponse response = new ServiceTicketResponse(request.getService(), ticket.getId());
+        if (request.isSaml()) {
+            response.setSaml(true);
+        }
+        FlowStateSupport.setServiceTicketResponse(springRequestContext, response);
         return Events.Success.event(this);
     }
 }

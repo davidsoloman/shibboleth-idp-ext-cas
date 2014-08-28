@@ -10,11 +10,17 @@ import org.springframework.webflow.execution.Event;
  */
 public enum ProtocolError {
 
+    /** Illegal state error. */
+    IllegalState("INTERNAL_ERROR", "E_ILLEGAL_STATE"),
+
     /** Ticket parameter provided but has invalid format. */
     InvalidTicketFormat("INVALID_TICKET", "E_INVALID_TICKET_FORMAT"),
 
     /** A valid ticket of an unsupported type was provided. */
     InvalidTicketType("INVALID_TICKET", "E_INVALID_TICKET_TYPE"),
+
+    /** Generic protocol violation error. */
+    ProtocolViolation("INVALID_REQUEST", "E_PROTOCOL_VIOLATION"),
 
     /** Unsupported condition where a proxy ticket validation occurs with the renew flag set. */
     RenewIncompatibleWithProxy("INVALID_REQUEST", "E_RENEW_INCOMPATIBLE_WITH_PROXY"),
@@ -30,7 +36,6 @@ public enum ProtocolError {
 
     /** Error retrieving IdP session. */
     SessionRetrievalError("INVALID_TICKET", "E_SESSION_RETRIEVAL_ERROR"),
-
     /** Ticket parameter required but not specified. */
     TicketNotSpecified("INVALID_REQUEST", "E_TICKET_NOT_SPECIFIED"),
 

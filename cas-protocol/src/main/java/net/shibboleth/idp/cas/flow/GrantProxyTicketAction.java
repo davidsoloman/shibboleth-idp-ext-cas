@@ -23,9 +23,7 @@ import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.ActionSupport;
-import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +67,7 @@ public class GrantProxyTicketAction extends AbstractProfileAction<ProxyTicketReq
         final TicketContext ticketContext = profileRequestContext.getSubcontext(TicketContext.class);
         if (ticketContext == null) {
             log.info("TicketContext not found in profile request context.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         final ProxyGrantingTicket pgt = (ProxyGrantingTicket) ticketContext.getTicket();
         final ProxyTicket pt;
@@ -82,6 +80,6 @@ public class GrantProxyTicketAction extends AbstractProfileAction<ProxyTicketReq
         }
         log.info("Granted proxy ticket for {}", request.getTargetService());
         FlowStateSupport.setProxyTicketResponse(springRequestContext, new ProxyTicketResponse(pt.getId()));
-        return new Event(this, Events.Success.id());
+        return Events.Success.event(this);
     }
 }

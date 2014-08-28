@@ -19,7 +19,6 @@ import static org.testng.AssertJUnit.assertEquals;
 @ContextConfiguration(
         locations = {
                 "/system/conf/global-system.xml",
-                "/conf/global.xml",
                 "/system/conf/mvc-beans.xml",
                 "/test/test-beans.xml",
                 "/test/test-webflow-config.xml",

@@ -19,6 +19,9 @@ public class ServiceTicketResponse {
     @Nonnull
     private final String ticket;
 
+    /** Flag indicating whether ticket request is via SAML 1.1 protocol. */
+    private boolean saml;
+
 
     /**
      * Creates a CAS service ticket response message for a service and granted ticket.
@@ -39,9 +42,21 @@ public class ServiceTicketResponse {
         return ticket;
     }
 
+    public boolean isSaml() {
+        return saml;
+    }
+
+    public void setSaml(final boolean saml) {
+        this.saml = saml;
+    }
+
     public String getRedirectUrl() {
         final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(service);
-        builder.queryParam(ProtocolParam.Ticket.id(), ticket);
+        if (saml) {
+            builder.queryParam(SamlParam.SAMLArt.name(), ticket);
+        } else {
+            builder.queryParam(ProtocolParam.Ticket.id(), ticket);
+        }
         return builder.build().toUriString();
     }
 }

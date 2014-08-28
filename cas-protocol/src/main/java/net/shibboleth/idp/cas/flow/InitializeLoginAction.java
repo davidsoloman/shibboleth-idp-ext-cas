@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.ProtocolParam;
+import net.shibboleth.idp.cas.protocol.SamlParam;
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import org.opensaml.messaging.context.MessageContext;
@@ -24,6 +25,7 @@ import org.springframework.webflow.execution.RequestContext;
  * @author Marvin S. Addison
  */
 public class InitializeLoginAction extends AbstractProfileAction<ServiceTicketRequest, Object> {
+
     @Nonnull
     @Override
     protected Event doExecute(
@@ -31,9 +33,12 @@ public class InitializeLoginAction extends AbstractProfileAction<ServiceTicketRe
             final @Nonnull ProfileRequestContext<ServiceTicketRequest, Object> profileRequestContext) {
 
         final ParameterMap params = springRequestContext.getRequestParameters();
-        final String service = params.get(ProtocolParam.Service.id());
+        String service = params.get(ProtocolParam.Service.id());
         if (service == null) {
-            return ProtocolError.ServiceNotSpecified.event(this);
+            service = params.get(SamlParam.TARGET.name());
+            if (service == null) {
+                return ProtocolError.ServiceNotSpecified.event(this);
+            }
         }
         final ServiceTicketRequest serviceTicketRequest = new ServiceTicketRequest(service);
 

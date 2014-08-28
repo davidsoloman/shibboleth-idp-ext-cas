@@ -35,6 +35,9 @@ public class ServiceTicketRequest {
     /** CAS protocol gateway flag. */
     private boolean gateway;
 
+    /** Flag indicating whether ticket request is via SAML 1.1 protocol. */
+    private boolean saml;
+
 
     public ServiceTicketRequest(@Nonnull final String service) {
         this.service = Constraint.isNotNull(service, "Service cannot be null");
@@ -58,5 +61,13 @@ public class ServiceTicketRequest {
 
     public void setGateway(final boolean gateway) {
         this.gateway = gateway;
+    }
+
+    public boolean isSaml() {
+        return saml;
+    }
+
+    public void setSaml(final boolean saml) {
+        this.saml = saml;
     }
 }

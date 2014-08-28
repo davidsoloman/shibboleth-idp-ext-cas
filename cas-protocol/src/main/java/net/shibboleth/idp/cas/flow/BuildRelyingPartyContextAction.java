@@ -2,13 +2,12 @@ package net.shibboleth.idp.cas.flow;
 
 import net.shibboleth.idp.attribute.context.AttributeContext;
 import net.shibboleth.idp.authn.context.SubjectContext;
+import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.cas.protocol.TicketValidationResponse;
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.session.context.SessionContext;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,15 +41,15 @@ public class BuildRelyingPartyContextAction
         final TicketValidationRequest request = FlowStateSupport.getTicketValidationRequest(springRequestContext);
         if (request == null) {
             log.info("TicketValidationRequest not found in request scope.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         final SessionContext sessionContext = profileRequestContext.getSubcontext(SessionContext.class);
         if (sessionContext == null || sessionContext.getIdPSession() == null) {
             log.info("Cannot locate IdP session");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         final RelyingPartyContext rpc = new RelyingPartyContext();
-        rpc.setAnonymous(false);
+        rpc.setVerified(true);
         rpc.setRelyingPartyId(request.getService());
         rpc.addSubcontext(new AttributeContext());
         profileRequestContext.addSubcontext(rpc);

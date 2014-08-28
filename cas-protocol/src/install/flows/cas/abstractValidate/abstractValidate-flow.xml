@@ -24,10 +24,6 @@
 
     <action-state id="initializeValidate">
         <evaluate expression="initProfileRequestContext"/>
-        <evaluate expression="initializeValidateAction" />
-        <transition on="serviceNotSpecified" to="serviceValidateFailure" />
-        <transition on="ticketNotSpecified" to="serviceValidateFailure" />
-        <transition on="proceed" to="validateTicket" />
     </action-state>
 
     <action-state id="validateTicket">
@@ -93,4 +89,8 @@
         </on-entry>
     </end-state>
 
+    <global-transitions>
+        <transition on="illegalState" to="serviceValidateFailure" />
+        <transition on="protocolViolation" to="serviceValidateFailure" />
+    </global-transitions>
 </flow>

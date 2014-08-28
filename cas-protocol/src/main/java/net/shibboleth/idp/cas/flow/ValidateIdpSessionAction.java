@@ -3,7 +3,6 @@ package net.shibboleth.idp.cas.flow;
 import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
 import net.shibboleth.idp.session.IdPSession;
 import net.shibboleth.idp.session.SessionException;
 import net.shibboleth.idp.session.SessionResolver;
@@ -12,7 +11,6 @@ import net.shibboleth.idp.session.criterion.SessionIdCriterion;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +58,7 @@ public class ValidateIdpSessionAction extends AbstractProfileAction {
         final TicketContext ticketContext = profileRequestContext.getSubcontext(TicketContext.class);
         if (ticketContext == null) {
             log.info("TicketContext not found in context tree.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         final String sessionId = ticketContext.getTicket().getSessionId();
         final IdPSession session;

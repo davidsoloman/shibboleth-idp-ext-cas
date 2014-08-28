@@ -5,13 +5,12 @@ import com.google.common.base.Functions;
 import net.shibboleth.idp.attribute.IdPAttribute;
 import net.shibboleth.idp.attribute.IdPAttributeValue;
 import net.shibboleth.idp.attribute.context.AttributeContext;
+import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.cas.protocol.TicketValidationResponse;
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +47,13 @@ public class ExtractAttributesAction
         final AttributeContext ac = attributeContextFunction.apply(profileRequestContext);
         if (ac == null) {
             log.info("AttributeContext not found in profile request context.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
 
         final TicketValidationResponse response = FlowStateSupport.getTicketValidationResponse(springRequestContext);
         if (response == null) {
             log.info("TicketValidationResponse not found in request scope.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
 
         for (IdPAttribute attribute : ac.getIdPAttributes().values()) {

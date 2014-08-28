@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(
         locations = {
             "/system/conf/global-system.xml",
-            "/conf/global.xml",
             "/system/conf/mvc-beans.xml",
             "/test/test-beans.xml",
             "/test/test-webflow-config.xml",

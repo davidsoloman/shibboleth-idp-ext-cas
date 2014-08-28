@@ -27,9 +27,7 @@ import net.shibboleth.idp.cas.ticket.ProxyTicket;
 import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,12 +68,12 @@ public class BuildProxyChainAction
                 FlowStateSupport.getTicketValidationResponse(springRequestContext);
         if (response == null) {
             log.info("TicketValidationResponse not found in flow state.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         final TicketContext ticketContext = profileRequestContext.getSubcontext(TicketContext.class);
         if (ticketContext == null) {
             log.info("TicketContext not found in profile request context.");
-            return ActionSupport.buildEvent(this, EventIds.INVALID_PROFILE_CTX);
+            return ProtocolError.IllegalState.event(this);
         }
         if (!(ticketContext.getTicket() instanceof ProxyTicket)) {
             return ProtocolError.InvalidTicketType.event(this);

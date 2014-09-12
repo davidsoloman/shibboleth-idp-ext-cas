@@ -54,7 +54,12 @@
         <evaluate expression="filterAttributes" />
         <evaluate expression="extractAttributesAction" />
         <evaluate expression="'finished'" />
-        <transition on="finished" to="serviceValidateSuccess" />
+        <transition on="finished" to="updateIdPSessionWithSPSession" />
+    </action-state>
+
+    <action-state id="updateIdPSessionWithSPSession">
+        <evaluate expression="updateIdPSessionWithSPSessionAction" />
+        <transition on="success" to="serviceValidateSuccess" />
     </action-state>
 
     <!-- View end states -->

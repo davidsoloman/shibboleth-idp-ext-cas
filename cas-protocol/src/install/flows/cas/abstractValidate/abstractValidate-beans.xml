@@ -69,4 +69,8 @@
     <bean id="extractAttributesAction"
           class="net.shibboleth.idp.cas.flow.ExtractAttributesAction" />
 
+    <bean id="updateIdPSessionWithSPSessionAction"
+          class="net.shibboleth.idp.cas.flow.UpdateIdPSessionWithSPSessionAction"
+          c:lifetime="%{idp.session.defaultSPlifetime:PT2H}" />
+
 </beans>

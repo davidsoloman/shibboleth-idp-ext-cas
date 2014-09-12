@@ -6,6 +6,8 @@ package net.shibboleth.idp.cas.flow;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.idp.authn.AuthenticationResult;
+import net.shibboleth.idp.authn.principal.UsernamePrincipal;
 import net.shibboleth.idp.cas.ticket.ServiceTicket;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.session.IdPSession;
@@ -47,6 +49,8 @@ public class SamlValidateFlowTest extends AbstractFlowTest {
         final String principal = "john";
         final String service = "https://test.example.org/";
         final IdPSession session = sessionManager.createSession(principal);
+        session.addAuthenticationResult(
+                new AuthenticationResult("authn/Password", new UsernamePrincipal(principal)));
         final ServiceTicket ticket = ticketService.createServiceTicket(session.getId(), service, false);
         final String requestBody = SAML_REQUEST_TEMPLATE.replace("@@TICKET@@", ticket.getId());
         request.setMethod("POST");

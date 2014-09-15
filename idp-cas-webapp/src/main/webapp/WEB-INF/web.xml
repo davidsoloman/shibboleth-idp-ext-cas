@@ -10,7 +10,7 @@
     </context-param>
     <context-param>
         <param-name>casServerUrlPrefix</param-name>
-        <param-value>https://localhost:8443/idp/cas</param-value>
+        <param-value>https://localhost:8443/idp/profile/cas</param-value>
     </context-param>
 
     <filter>
@@ -37,7 +37,7 @@
         </filter-class>
         <init-param>
             <param-name>casServerLoginUrl</param-name>
-            <param-value>https://localhost:8443/idp/cas/login</param-value>
+            <param-value>https://localhost:8443/idp/profile/cas/login</param-value>
         </init-param>
     </filter>
     <filter-mapping>

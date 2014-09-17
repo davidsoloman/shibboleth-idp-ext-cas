@@ -33,7 +33,6 @@ import org.springframework.webflow.execution.RequestContext;
  * ticket that was successfully validated to grant access. Requires the following to be available under the
  * {@link org.opensaml.profile.context.ProfileRequestContext}:
  * <ul>
- *     <li>{@link AuthenticationContext}</li>
  *     <li>{@link SessionContext}</li>
  *     <li>{@link TicketContext}</li>
  * </ul>
@@ -66,11 +65,6 @@ public class UpdateIdPSessionWithSPSessionAction extends AbstractProfileAction {
             final @Nonnull RequestContext springRequestContext,
             final @Nonnull ProfileRequestContext profileRequestContext) {
 
-//        final AuthenticationContext authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
-//        if (authCtx == null || authCtx.getAuthenticationResult() == null) {
-//            log.debug("Cannot create CAS SP session since no AuthenticationResult found.");
-//            return ProtocolError.IllegalState.event(this);
-//        }
         final TicketContext ticketContext = profileRequestContext.getSubcontext(TicketContext.class);
         if (ticketContext == null) {
             log.debug("Cannot create CAS SP session since no TicketContext found.");
@@ -82,12 +76,9 @@ public class UpdateIdPSessionWithSPSessionAction extends AbstractProfileAction {
             return ProtocolError.IllegalState.event(this);
         }
 
-        final IdPSession session = sessionContext.getIdPSession();
         final long now = System.currentTimeMillis();
         final SPSession sps = new CASSPSession(
                 ticketContext.getTicket().getService(),
-                session.getAuthenticationResults().iterator().next().getAuthenticationFlowId(),
-//                authCtx.getAuthenticationResult().getAuthenticationFlowId(),
                 now,
                 now + sessionLifetime,
                 ticketContext.getTicket().getId());

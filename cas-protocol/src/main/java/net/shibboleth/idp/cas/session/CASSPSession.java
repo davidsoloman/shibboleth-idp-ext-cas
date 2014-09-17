@@ -28,18 +28,16 @@ public class CASSPSession extends BasicSPSession {
      * Creates a new CAS SP session.
      *
      * @param id         the identifier of the service associated with this session
-     * @param flowId     authentication flow used to authenticate the principal to this service
      * @param creation   creation time of session, in milliseconds since the epoch
      * @param expiration expiration time of session, in milliseconds since the epoch
      * @param ticketId   ticket ID used to gain access to the service
      */
     public CASSPSession(
             @Nonnull @NotEmpty String id,
-            @Nonnull @NotEmpty String flowId,
             @Duration @Positive long creation,
             @Duration @Positive long expiration,
             @Nonnull @NotEmpty String ticketId) {
-        super(id, flowId, creation, expiration);
+        super(id, creation, expiration);
         this.ticketId = Constraint.isNotNull(StringSupport.trimOrNull(ticketId), "Ticket ID cannot be null or empty");
     }
 

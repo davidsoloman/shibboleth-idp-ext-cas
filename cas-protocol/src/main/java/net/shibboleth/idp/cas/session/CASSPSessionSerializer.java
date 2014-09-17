@@ -49,9 +49,8 @@ public class CASSPSessionSerializer extends AbstractSPSessionSerializer {
     protected SPSession doDeserialize(
             @Nonnull final JsonObject obj,
             @Nonnull @NotEmpty final String id,
-            @Nonnull @NotEmpty final String flowId,
             final long creation,
             final long expiration) throws IOException {
-        return new CASSPSession(id, flowId, creation, expiration, obj.getString(TICKET_FIELD));
+        return new CASSPSession(id, creation, expiration, obj.getString(TICKET_FIELD));
     }
 }

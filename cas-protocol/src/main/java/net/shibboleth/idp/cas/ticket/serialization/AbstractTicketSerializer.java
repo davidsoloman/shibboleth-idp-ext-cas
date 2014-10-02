@@ -54,7 +54,7 @@ public abstract class AbstractTicketSerializer<T extends Ticket> implements Stor
     @Override
     @Nonnull
     public T deserialize(
-            final int version,
+            final long version,
             @Nonnull @NotEmpty final String context,
             @Nonnull @NotEmpty final String key,
             @Nonnull @NotEmpty final String value,

@@ -8,16 +8,18 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 
-import net.shibboleth.idp.cas.ticket.TicketIdGenerator;
+import net.shibboleth.idp.cas.config.ProxyGrantingTicketConfiguration;
+import net.shibboleth.idp.profile.config.SecurityConfiguration;
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -27,10 +29,14 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.security.x509.X509Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +46,41 @@ import org.slf4j.LoggerFactory;
  * @author Marvin S. Addison
  */
 public class PkixProxyAuthenticator extends AbstractProxyAuthenticator {
+
+    /**
+     * Delegates X.509 certificate trust to an underlying OpenSAML <code>TrustEngine</code>.
+     */
+    private static class TrustEngineTrustStrategy implements TrustStrategy {
+
+        private final TrustEngine<X509Credential> trustEngine;
+
+        /** Class logger. */
+        private final Logger log = LoggerFactory.getLogger(TrustEngineTrustStrategy.class);
+
+        public TrustEngineTrustStrategy(@Nonnull final TrustEngine<X509Credential> engine) {
+            trustEngine = Constraint.isNotNull(engine, "TrustEngine cannot be null");
+        }
+
+        @Override
+        public boolean isTrusted(final X509Certificate[] certificates, final String authType)
+                throws CertificateException {
+            if (certificates == null || certificates.length == 0) {
+                return false;
+            }
+            // Validate the first end-entity certificate
+            for (X509Certificate cert : certificates) {
+                if (cert.getBasicConstraints() < 0) {
+                    try {
+                        log.debug("Validating cert {}", cert.getSubjectDN());
+                        return trustEngine.validate(new BasicX509Credential(certificates[0]), new CriteriaSet());
+                    } catch (SecurityException e) {
+                        throw new CertificateException("X509 validation error", e);
+                    }
+                }
+            }
+            return false;
+        }
+    }
 
     /** Default connection and socket timeout. */
     private static final int DEFAULT_TIMEOUT = 3000;
@@ -53,41 +94,28 @@ public class PkixProxyAuthenticator extends AbstractProxyAuthenticator {
     @Positive private int timeout = DEFAULT_TIMEOUT;
 
     /**
-     * Creates a new instance that uses strict hostname verification.
+     * Creates a new instance.
      *
-     * @param pgtIdGenerator Generator of PGT identifiers.
-     * @param pgtIouGenerator Generator of PGTIOU identifiers.
-     * @param trustStore Trust store used for remote peer certificate verification.
+     * @param configuration Proxy-granting ticket configuration.
      */
-    public PkixProxyAuthenticator(
-            @Nonnull final TicketIdGenerator pgtIdGenerator,
-            @Nonnull final TicketIdGenerator pgtIouGenerator,
-            @Nonnull final KeyStore trustStore) {
-        this(pgtIdGenerator, pgtIouGenerator, trustStore, SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER);
-    }
-
-    /**
-     * Creates a new instance that uses the given hostname verification strategy.
-     *
-     * @param pgtIdGenerator Generator of PGT identifiers.
-     * @param pgtIouGenerator Generator of PGTIOU identifiers.
-     * @param trustStore Trust store used for remote peer certificate verification.
-     * @param hostnameVerifier Apache HttpComponents hostname verifier instance.
-     */
-    public PkixProxyAuthenticator(
-            @Nonnull final TicketIdGenerator pgtIdGenerator,
-            @Nonnull final TicketIdGenerator pgtIouGenerator,
-            @Nonnull final KeyStore trustStore,
-            @Nonnull final X509HostnameVerifier hostnameVerifier) {
-        super(pgtIdGenerator, pgtIouGenerator);
-        Constraint.isNotNull(trustStore, "Trust store cannot be null.");
-        Constraint.isNotNull(hostnameVerifier, "Hostname verifier cannot be null.");
+    public PkixProxyAuthenticator(@Nonnull final ProxyGrantingTicketConfiguration configuration) {
+        super(configuration);
         try {
+            final SecurityConfiguration config = configuration.getSecurityConfiguration();
+            final TrustStrategy trustStrategy;
+            if (config != null &&
+                config.getClientTLSValidationConfiguration() != null &&
+                config.getClientTLSValidationConfiguration().getX509TrustEngine() != null) {
+                trustStrategy = new TrustEngineTrustStrategy(
+                        config.getClientTLSValidationConfiguration().getX509TrustEngine());
+            } else {
+                throw new IllegalArgumentException("Must specify X509 trust engine in TLS client security config");
+            }
             SSLContext sslContext = SSLContexts.custom()
                     .useTLS()
-                    .loadTrustMaterial(trustStore)
+                    .loadTrustMaterial(null, trustStrategy)
                     .build();
-            socketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+            socketFactory = new SSLConnectionSocketFactory(sslContext, configuration.getHostnameVerifier());
         } catch (Exception e) {
             throw new RuntimeException("SSL initialization error", e);
         }

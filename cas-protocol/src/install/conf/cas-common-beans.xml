@@ -23,22 +23,22 @@
           p:proxyTicketValidityPeriod="%{cas.pt.validityPeriod:PT20S}" />
 
     <bean id="cas.serviceTicketIdGenerator"
-          class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator"
+          class="net.shibboleth.idp.cas.ticket.TicketIdentifierGenerationStrategy"
           p:prefix="ST"
           p:length="%{cas.st.length:25}" />
 
     <bean id="cas.proxyGrantingTicketIdGenerator"
-          class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator"
+          class="net.shibboleth.idp.cas.ticket.TicketIdentifierGenerationStrategy"
           p:prefix="PGT"
           p:length="%{cas.pgt.length:50}" />
 
     <bean id="cas.proxyGrantingTicketIOUGenerator"
-          class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator"
+          class="net.shibboleth.idp.cas.ticket.TicketIdentifierGenerationStrategy"
           p:prefix="PGTIOU"
           p:length="%{cas.pgtiou.length:50}" />
 
     <bean id="cas.proxyTicketIdGenerator"
-          class="net.shibboleth.idp.cas.ticket.CasProtocolTicketIdGenerator"
+          class="net.shibboleth.idp.cas.ticket.TicketIdentifierGenerationStrategy"
           p:prefix="PT"
           p:length="%{cas.pt.length:25}" />
 

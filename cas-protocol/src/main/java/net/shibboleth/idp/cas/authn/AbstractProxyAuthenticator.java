@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.security.auth.login.FailedLoginException;
 
+import net.shibboleth.idp.cas.config.ProxyGrantingTicketConfiguration;
 import net.shibboleth.idp.cas.protocol.ProtocolParam;
 import net.shibboleth.idp.cas.ticket.TicketIdGenerator;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
@@ -29,23 +30,17 @@ public abstract class AbstractProxyAuthenticator implements Authenticator<URI, P
     /** Required https scheme for proxy callbacks. */
     protected static final String HTTPS_SCHEME = "https";
 
-    /** Generates proxy-granting ticket identifiers. */
-    @Nonnull private TicketIdGenerator proxyGrantingTicketIdGenerator;
+    @Nonnull
+    protected final ProxyGrantingTicketConfiguration proxyGrantingTicketConfiguration;
 
-    /** Generates proxy-granting ticket IOU identifiers. */
-    @Nonnull private TicketIdGenerator proxyGrantingTicketIouGenerator;
-
-    @NotEmpty private Set<Integer> allowedResultCodes = Collections.singleton(200);
-
-    protected AbstractProxyAuthenticator(
-            @Nonnull final TicketIdGenerator pgtIdGenerator, @Nonnull final TicketIdGenerator pgtIouGenerator) {
-        this.proxyGrantingTicketIdGenerator = Constraint.isNotNull(pgtIdGenerator, "PGT ID generator cannot be null");
-        this.proxyGrantingTicketIouGenerator = Constraint.isNotNull(pgtIouGenerator, "PGTIOU generator cannot be null");
-    }
-
-    public void setAllowedResultCodes(@NotEmpty final Set<Integer> allowedResultCodes) {
-        this.allowedResultCodes = (Set<Integer>) Constraint.isNotEmpty(
-                allowedResultCodes, "Allowed result codes cannot be null or empty.");
+    /**
+     * Creates a new instance.
+     *
+     * @param configuration Proxy-granting ticket configuration.
+     */
+    protected AbstractProxyAuthenticator(@Nonnull final ProxyGrantingTicketConfiguration configuration) {
+        this.proxyGrantingTicketConfiguration = Constraint.isNotNull(
+                configuration, "ProxyGrantingTicketConfiguration cannot be null.");
     }
 
     @Override
@@ -55,8 +50,8 @@ public abstract class AbstractProxyAuthenticator implements Authenticator<URI, P
             throw new GeneralSecurityException(credential + " is not an https URI as required.");
         }
         final ProxyIdentifiers proxyIds = new ProxyIdentifiers(
-                proxyGrantingTicketIdGenerator.generate(),
-                proxyGrantingTicketIouGenerator.generate());
+                proxyGrantingTicketConfiguration.getSecurityConfiguration().getIdGenerator().generateIdentifier(),
+                proxyGrantingTicketConfiguration.getPGTIOUGenerator().generateIdentifier());
         final URI proxyCallbackUri;
         try {
             proxyCallbackUri = new URIBuilder(credential)
@@ -67,7 +62,7 @@ public abstract class AbstractProxyAuthenticator implements Authenticator<URI, P
             throw new RuntimeException("Error creating proxy callback URL", e);
         }
         final int status = authenticateProxyCallback(proxyCallbackUri);
-        if (!allowedResultCodes.contains(status)) {
+        if (!proxyGrantingTicketConfiguration.getAllowedResponseCodes().contains(status)) {
             throw new FailedLoginException(credential + " returned unacceptable status code " + status);
         }
         return proxyIds;

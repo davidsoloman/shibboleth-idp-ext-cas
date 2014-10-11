@@ -11,6 +11,9 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import net.shibboleth.idp.cas.config.ProxyGrantingTicketConfiguration;
+import net.shibboleth.idp.cas.config.ProxyTicketConfiguration;
+import net.shibboleth.idp.cas.config.ServiceTicketConfiguration;
 import net.shibboleth.idp.cas.ticket.serialization.ProxyGrantingTicketSerializer;
 import net.shibboleth.idp.cas.ticket.serialization.ProxyTicketSerializer;
 import net.shibboleth.idp.cas.ticket.serialization.ServiceTicketSerializer;
@@ -32,12 +35,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SimpleTicketService implements TicketService {
 
-    private static final String ST_CONTEXT = "http://jasig.org/cas/tickets/ST";
-
-    private static final String PT_CONTEXT = "http://jasig.org/cas/tickets/PT";
-
-    private static final String PGT_CONTEXT = "http://jasig.org/cas/tickets/PGT";
-
     /** Map of ticket classes to context names. */
     private static final Map<Class<? extends Ticket>, String> CONTEXT_CLASS_MAP = new HashMap<>();
 
@@ -55,67 +52,41 @@ public class SimpleTicketService implements TicketService {
 
     /** Storage service to which ticket persistence operations are delegated. */
     @Nonnull
-    private StorageService storageService;
+    private final StorageService storageService;
 
-    /** Creates identifiers for service tickets. */
     @Nonnull
-    private TicketIdGenerator serviceTicketIdGenerator;
+    private final ServiceTicketConfiguration serviceTicketConfiguration;
 
-    /** Creates identifiers for proxy tickets. */
     @Nonnull
-    private TicketIdGenerator proxyTicketIdGenerator;
+    private final ProxyGrantingTicketConfiguration proxyGrantingTicketConfiguration;
 
-    /** Validity time period of service tickets created with this factory. */
-    @Duration
-    @Positive
-    private long serviceTicketValidityPeriod;
-
-    /** Validity time period of proxy-granting tickets created with this factory. */
-    @Duration
-    @Positive
-    private long proxyGrantingTicketValidityPeriod;
-
-    /** Validity time period of proxy tickets created with this factory. */
-    @Duration
-    @Positive
-    private long proxyTicketValidityPeriod;
-
+    @Nonnull
+    private final ProxyTicketConfiguration proxyTicketConfiguration;
 
     static {
-        CONTEXT_CLASS_MAP.put(ServiceTicket.class, ST_CONTEXT);
-        CONTEXT_CLASS_MAP.put(ProxyTicket.class, PT_CONTEXT);
-        CONTEXT_CLASS_MAP.put(ProxyGrantingTicket.class, PGT_CONTEXT);
+        CONTEXT_CLASS_MAP.put(ServiceTicket.class, ServiceTicketConfiguration.PROFILE_ID);
+        CONTEXT_CLASS_MAP.put(ProxyTicket.class, ProxyTicketConfiguration.PROFILE_ID);
+        CONTEXT_CLASS_MAP.put(ProxyGrantingTicket.class, ProxyGrantingTicketConfiguration.PROFILE_ID);
         SERIALIZER_MAP.put(ServiceTicket.class, ST_SERIALIZER);
         SERIALIZER_MAP.put(ProxyTicket.class, PT_SERIALIZER);
         SERIALIZER_MAP.put(ProxyGrantingTicket.class, PGT_SERIALIZER);
     }
 
-    public void setStorageService(@Nonnull final StorageService storageService) {
-        this.storageService = Constraint.isNotNull(storageService, "Storage service cannot be null.");
+    public SimpleTicketService(
+            @Nonnull final StorageService storageService,
+            @Nonnull final ServiceTicketConfiguration serviceTicketConfiguration,
+            @Nonnull final ProxyGrantingTicketConfiguration proxyGrantingTicketConfiguration,
+            @Nonnull final ProxyTicketConfiguration proxyTicketConfiguration)
+    {
+        this.storageService = Constraint.isNotNull(storageService, "StorageService cannot be null.");
+        this.serviceTicketConfiguration = Constraint.isNotNull(
+                serviceTicketConfiguration, "ServiceTicketConfiguration cannot be null.");
+        this.proxyGrantingTicketConfiguration = Constraint.isNotNull(
+                proxyGrantingTicketConfiguration, "ProxyGrantingTicketConfiguration cannot be null.");
+        this.proxyTicketConfiguration = Constraint.isNotNull(
+                proxyTicketConfiguration, "ProxyTicketConfiguration cannot be null.");
     }
 
-    public void setServiceTicketIdGenerator(@Nonnull final TicketIdGenerator generator) {
-        this.serviceTicketIdGenerator = Constraint.isNotNull(generator, "TicketIdGenerator cannot be null.");
-    }
-
-    public void setProxyTicketIdGenerator(@Nonnull final TicketIdGenerator generator) {
-        this.proxyTicketIdGenerator = Constraint.isNotNull(generator, "TicketIdGenerator cannot be null.");
-    }
-
-    public void setServiceTicketValidityPeriod(@Duration @Positive final long millis) {
-        this.serviceTicketValidityPeriod = Constraint.isGreaterThan(
-                0, millis, "Ticket validity period must be greater than 0.");
-    }
-
-    public void setProxyGrantingTicketValidityPeriod(@Duration @Positive final long millis) {
-        this.proxyGrantingTicketValidityPeriod = Constraint.isGreaterThan(
-                0, millis, "Ticket validity period must be greater than 0.");
-    }
-
-    public void setProxyTicketValidityPeriod(@Duration @Positive final long millis) {
-        this.proxyTicketValidityPeriod = Constraint.isGreaterThan(
-                0, millis, "Ticket validity period must be greater than 0.");
-    }
 
     @Override
     @Nonnull
@@ -126,10 +97,10 @@ public class SimpleTicketService implements TicketService {
         Constraint.isNotNull(sessionId, "Session ID cannot be null");
         Constraint.isNotNull(service, "Service cannot be null");
         final ServiceTicket st = new ServiceTicket(
-                serviceTicketIdGenerator.generate(),
+                serviceTicketConfiguration.getSecurityConfiguration().getIdGenerator().generateIdentifier(),
                 sessionId,
                 service,
-                DateTime.now().plus(serviceTicketValidityPeriod).toInstant(),
+                DateTime.now().plus(serviceTicketConfiguration.getTicketValidityPeriod()).toInstant(),
                 renew);
         log.debug("Generated ticket {}", st);
         store(st);
@@ -153,7 +124,7 @@ public class SimpleTicketService implements TicketService {
                 pgtId,
                 serviceTicket.getSessionId(),
                 serviceTicket.getService(),
-                DateTime.now().plus(proxyGrantingTicketValidityPeriod).toInstant(),
+                DateTime.now().plus(proxyGrantingTicketConfiguration.getTicketValidityPeriod()).toInstant(),
                 null);
         log.debug("Generated ticket {}", pgt);
         store(pgt);
@@ -170,7 +141,7 @@ public class SimpleTicketService implements TicketService {
                 pgtId,
                 proxyTicket.getSessionId(),
                 proxyTicket.getService(),
-                DateTime.now().plus(proxyGrantingTicketValidityPeriod).toInstant(),
+                DateTime.now().plus(proxyGrantingTicketConfiguration.getTicketValidityPeriod()).toInstant(),
                 proxyTicket.getPgtId());
         log.debug("Generated ticket {}", pgt);
         store(pgt);
@@ -199,10 +170,10 @@ public class SimpleTicketService implements TicketService {
         Constraint.isNotNull(pgt, "ProxyGrantingTicket cannot be null");
         Constraint.isNotNull(service, "Service cannot be null");
         final ProxyTicket pt = new ProxyTicket(
-                proxyTicketIdGenerator.generate(),
+                proxyTicketConfiguration.getSecurityConfiguration().getIdGenerator().generateIdentifier(),
                 pgt.getSessionId(),
                 service,
-                DateTime.now().plus(proxyTicketValidityPeriod).toInstant(),
+                DateTime.now().plus(proxyTicketConfiguration.getTicketValidityPeriod()).toInstant(),
                 pgt.getId());
         store(pt);
         return pt;

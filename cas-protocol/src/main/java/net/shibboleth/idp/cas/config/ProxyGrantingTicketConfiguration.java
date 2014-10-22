@@ -8,6 +8,7 @@
 
 package net.shibboleth.idp.cas.config;
 
+import net.shibboleth.idp.cas.authn.Authenticator;
 import net.shibboleth.idp.cas.ticket.TicketIdentifierGenerationStrategy;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
@@ -18,6 +19,8 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 
 import javax.annotation.Nonnull;
+
+import java.net.URI;
 import java.util.Collections;
 import java.util.Set;
 
@@ -32,11 +35,8 @@ public class ProxyGrantingTicketConfiguration extends AbstractTicketConfiguratio
 
     /** Hostname verification strategy used in validating proxy callback. */
     @Nonnull
-    private X509HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER;
+    private Authenticator<URI, Void> proxyAuthenticator;
 
-    /** List of HTTP response codes permitted for successful proxy callback. */
-    @NotEmpty @NonnullElements
-    private Set<Integer> allowedResponseCodes = Collections.singleton(200);
 
     /** PGTIOU ticket ID generator. */
     @Nonnull
@@ -51,46 +51,8 @@ public class ProxyGrantingTicketConfiguration extends AbstractTicketConfiguratio
     @Override
     public void initialize() throws ComponentInitializationException {
         Constraint.isNotNull(getSecurityConfiguration().getClientTLSValidationConfiguration(),
-                "Security configuration TLS validation cannot be null.");
+                "TLS validation configuration cannot be null");
         super.initialize();
-    }
-
-    /**
-     * @return Set of HTTP response codes permitted for successful proxy callback authentication.
-     */
-    @NotEmpty @NonnullElements
-    public Set<Integer> getAllowedResponseCodes() {
-        return allowedResponseCodes;
-    }
-
-    /**
-     * Sets the HTTP response codes permitted for successful authentication of the proxy callback URL.
-     *
-     * @param responseCodes One or more HTTP response codes.
-     */
-    public void setAllowedResponseCodes(@NotEmpty @NonnullElements final Set<Integer> responseCodes) {
-        Constraint.isNotEmpty(responseCodes, "Response codes cannot be null or empty.");
-        Constraint.noNullItems(responseCodes.toArray(), "Response codes cannot contain null elements.");
-        this.allowedResponseCodes = responseCodes;
-    }
-
-    /**
-     * Gets the hostname verification strategy used for validating proxy callback URLs, assumed to be HTTPS.
-     *
-     * @return Hostname verification strategy. Default is {@link SSLConnectionSocketFactory#STRICT_HOSTNAME_VERIFIER}.
-     */
-    @Nonnull
-    public X509HostnameVerifier getHostnameVerifier() {
-        return hostnameVerifier;
-    }
-
-    /**
-     * Gets the hostname verification strategy used for validating proxy callback URLs, assumed to be HTTPS.
-     *
-     * @return Hostname verification strategy.
-     */
-    public void setHostnameVerifier(@Nonnull X509HostnameVerifier hostnameVerifier) {
-        this.hostnameVerifier = hostnameVerifier;
     }
 
     /**

@@ -5,12 +5,15 @@
 package net.shibboleth.idp.cas.flow;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.cas.authn.Authenticator;
 import net.shibboleth.idp.cas.authn.ProxyIdentifiers;
+import net.shibboleth.idp.cas.config.ProxyGrantingTicketConfiguration;
 import net.shibboleth.idp.cas.protocol.ProtocolError;
+import net.shibboleth.idp.cas.protocol.ProtocolParam;
 import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.cas.protocol.TicketValidationResponse;
 import net.shibboleth.idp.cas.ticket.ProxyTicket;
@@ -20,6 +23,7 @@ import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import org.apache.http.client.utils.URIBuilder;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,19 +49,30 @@ public class ValidateProxyCallbackAction
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(ValidateProxyCallbackAction.class);
 
-    /** Performs proxy authentication. */
-    @Nonnull private Authenticator<URI, ProxyIdentifiers> proxyAuthenticator;
+    /** Proxy configuration container. */
+    @Nonnull private final ProxyGrantingTicketConfiguration configuration;
+
+    /** Validates the proxy callback endpoint. */
+    @Nonnull private final Authenticator<URI, Void> proxyAuthenticator;
 
     /** Manages CAS tickets. */
-    @Nonnull private TicketService ticketService;
+    @Nonnull private final TicketService ticketService;
 
 
-    public void setTicketService(@Nonnull final TicketService ticketService) {
-        this.ticketService = Constraint.isNotNull(ticketService, "Ticket service cannot be null.");
-    }
-
-    public void setProxyAuthenticator(@Nonnull final Authenticator<URI, ProxyIdentifiers> proxyAuthenticator) {
-        this.proxyAuthenticator = Constraint.isNotNull(proxyAuthenticator, "Proxy authenticator cannot be null.");
+    /**
+     * Creates a new instance.
+     *
+     * @param configuration Proxy granting ticket configuration.
+     * @param proxyAuthenticator Component that validates the proxy callback endpoint.
+     * @param ticketService Ticket service component.
+     */
+    public ValidateProxyCallbackAction(
+            @Nonnull ProxyGrantingTicketConfiguration configuration,
+            @Nonnull Authenticator<URI, Void> proxyAuthenticator,
+            @Nonnull TicketService ticketService) {
+        this.configuration = Constraint.isNotNull(configuration, "ProxyGrantingTicketConfiguration cannot be null");
+        this.proxyAuthenticator = Constraint.isNotNull(proxyAuthenticator, "ProxyAuthenticator cannot be null");
+        this.ticketService = Constraint.isNotNull(ticketService, "TicketService cannot be null");
     }
 
     @Nonnull
@@ -83,9 +98,21 @@ public class ValidateProxyCallbackAction
             return ProtocolError.IllegalState.event(this);
         }
         final Ticket ticket = ticketContext.getTicket();
+        final ProxyIdentifiers proxyIds = new ProxyIdentifiers(
+                configuration.getSecurityConfiguration().getIdGenerator().generateIdentifier(),
+                configuration.getPGTIOUGenerator().generateIdentifier());
+        final URI proxyCallbackUri;
         try {
-            log.debug("Attempting proxy authentication to {}", request.getPgtUrl());
-            final ProxyIdentifiers proxyIds = proxyAuthenticator.authenticate(URI.create(request.getPgtUrl()));
+            proxyCallbackUri = new URIBuilder(request.getPgtUrl())
+                    .addParameter(ProtocolParam.PgtId.id(), proxyIds.getPgtId())
+                    .addParameter(ProtocolParam.PgtIou.id(), proxyIds.getPgtIou())
+                    .build();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Error creating proxy callback URL", e);
+        }
+        try {
+            log.debug("Attempting proxy authentication to {}", proxyCallbackUri);
+            proxyAuthenticator.authenticate(proxyCallbackUri);
             if (ticket instanceof ServiceTicket) {
                 ticketService.createProxyGrantingTicket((ServiceTicket) ticket, proxyIds.getPgtId());
             } else {

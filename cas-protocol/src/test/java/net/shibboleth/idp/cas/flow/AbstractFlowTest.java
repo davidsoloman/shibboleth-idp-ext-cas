@@ -26,6 +26,7 @@ import org.testng.annotations.BeforeMethod;
         locations = {
                 "/system/conf/global-system.xml",
                 "/system/conf/mvc-beans.xml",
+                "/system/conf/relying-party-system.xml",
                 "/test/test-beans.xml",
                 "/test/test-webflow-config.xml",
                 "/flows/cas/login/login-beans.xml",

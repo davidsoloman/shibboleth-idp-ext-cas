@@ -5,7 +5,6 @@
 package net.shibboleth.idp.cas.authn;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Set;
@@ -13,59 +12,47 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.security.auth.login.FailedLoginException;
 
-import net.shibboleth.idp.cas.config.ProxyGrantingTicketConfiguration;
-import net.shibboleth.idp.cas.protocol.ProtocolParam;
-import net.shibboleth.idp.cas.ticket.TicketIdGenerator;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import org.apache.http.client.utils.URIBuilder;
 
 /**
- * Abstract base class for proxy callback authentication.
+ * Abstract base class for proxy callback authentication by means of validating an HTTPS endpoint.
  *
  * @author Marvin S. Addison
  */
-public abstract class AbstractProxyAuthenticator implements Authenticator<URI, ProxyIdentifiers> {
+public abstract class AbstractProxyAuthenticator implements Authenticator<URI, Void> {
 
     /** Required https scheme for proxy callbacks. */
     protected static final String HTTPS_SCHEME = "https";
 
-    @Nonnull
-    protected final ProxyGrantingTicketConfiguration proxyGrantingTicketConfiguration;
+    /** List of HTTP response codes permitted for successful proxy callback. */
+    @NotEmpty
+    @NonnullElements
+    private Set<Integer> allowedResponseCodes = Collections.singleton(200);
 
     /**
-     * Creates a new instance.
+     * Sets the HTTP response codes permitted for successful authentication of the proxy callback URL.
      *
-     * @param configuration Proxy-granting ticket configuration.
+     * @param responseCodes One or more HTTP response codes.
      */
-    protected AbstractProxyAuthenticator(@Nonnull final ProxyGrantingTicketConfiguration configuration) {
-        this.proxyGrantingTicketConfiguration = Constraint.isNotNull(
-                configuration, "ProxyGrantingTicketConfiguration cannot be null.");
+    public void setAllowedResponseCodes(@NotEmpty @NonnullElements final Set<Integer> responseCodes) {
+        Constraint.isNotEmpty(responseCodes, "Response codes cannot be null or empty.");
+        Constraint.noNullItems(responseCodes.toArray(), "Response codes cannot contain null elements.");
+        this.allowedResponseCodes = responseCodes;
     }
 
     @Override
-    public ProxyIdentifiers authenticate(@Nonnull final URI credential) throws GeneralSecurityException {
+    public Void authenticate(@Nonnull final URI credential) throws GeneralSecurityException {
         Constraint.isNotNull(credential, "URI to authenticate cannot be null.");
         if (!HTTPS_SCHEME.equalsIgnoreCase(credential.getScheme())) {
             throw new GeneralSecurityException(credential + " is not an https URI as required.");
         }
-        final ProxyIdentifiers proxyIds = new ProxyIdentifiers(
-                proxyGrantingTicketConfiguration.getSecurityConfiguration().getIdGenerator().generateIdentifier(),
-                proxyGrantingTicketConfiguration.getPGTIOUGenerator().generateIdentifier());
-        final URI proxyCallbackUri;
-        try {
-            proxyCallbackUri = new URIBuilder(credential)
-                .addParameter(ProtocolParam.PgtId.id(), proxyIds.getPgtId())
-                .addParameter(ProtocolParam.PgtIou.id(), proxyIds.getPgtIou())
-                .build();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Error creating proxy callback URL", e);
+        final int status = authenticateProxyCallback(credential);
+        if (!allowedResponseCodes.contains(status)) {
+            throw new FailedLoginException(credential + " returned unacceptable HTTP status code " + status);
         }
-        final int status = authenticateProxyCallback(proxyCallbackUri);
-        if (!proxyGrantingTicketConfiguration.getAllowedResponseCodes().contains(status)) {
-            throw new FailedLoginException(credential + " returned unacceptable status code " + status);
-        }
-        return proxyIds;
+        return null;
     }
 
     /**

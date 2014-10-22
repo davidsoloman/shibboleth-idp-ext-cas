@@ -40,11 +40,16 @@ public class GrantServiceTicketAction extends AbstractProfileAction<ServiceTicke
     private final Logger log = LoggerFactory.getLogger(GrantServiceTicketAction.class);
 
     /** Manages CAS tickets. */
-    @Nonnull private TicketService ticketService;
+    @Nonnull private final TicketService ticketService;
 
 
-    public void setTicketService(@Nonnull final TicketService ticketService) {
-        this.ticketService = Constraint.isNotNull(ticketService, "Ticket service cannot be null.");
+    /**
+     * Creates a new instance.
+     *
+     * @param ticketService Ticket service component.
+     */
+    public GrantServiceTicketAction(@Nonnull TicketService ticketService) {
+        this.ticketService = Constraint.isNotNull(ticketService, "TicketService cannot be null");
     }
 
     /** {@inheritDoc} */

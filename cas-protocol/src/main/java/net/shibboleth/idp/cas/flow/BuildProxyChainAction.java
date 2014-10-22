@@ -38,11 +38,16 @@ public class BuildProxyChainAction
     private final Logger log = LoggerFactory.getLogger(BuildProxyChainAction.class);
 
     /** Manages CAS tickets. */
-    @Nonnull private TicketService ticketService;
+    @Nonnull private final TicketService ticketService;
 
 
-    public void setTicketService(@Nonnull final TicketService ticketService) {
-        this.ticketService = Constraint.isNotNull(ticketService, "Ticket service cannot be null.");
+    /**
+     * Creates a new instance.
+     *
+     * @param ticketService Ticket service component.
+     */
+    public BuildProxyChainAction(@Nonnull TicketService ticketService) {
+        this.ticketService = Constraint.isNotNull(ticketService, "TicketService cannot be null");
     }
 
     @Nonnull

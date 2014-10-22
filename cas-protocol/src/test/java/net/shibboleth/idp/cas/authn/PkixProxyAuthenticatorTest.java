@@ -21,7 +21,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.x509.X509Credential;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -38,41 +41,36 @@ import static org.testng.AssertJUnit.fail;
  * @author Marvin S. Addison
  */
 @ContextConfiguration(
-        locations = {
-                "/system/conf/global-system.xml",
-                "/system/conf/mvc-beans.xml",
-                "/test/test-beans.xml",
-                "/test/test-webflow-config.xml",
-                "/flows/cas/login/login-beans.xml",
-                "/flows/cas/serviceValidate/serviceValidate-beans.xml"},
+        locations = "/test/proxy-authn-test.xml",
         initializers = IdPPropertiesApplicationContextInitializer.class)
 @WebAppConfiguration
 public class PkixProxyAuthenticatorTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private PkixProxyAuthenticator proxyAuthenticator;
+    private ApplicationContext context;
 
     @DataProvider(name = "data")
     public Object[][] buildTestData() {
         return new Object[][] {
-                new Object[] { "src/test/resources/creds/nobody-1.p12", 200, new CertificateException() },
-                new Object[] { "src/test/resources/creds/nobody-2.p12", 200, null },
-                new Object[] { "src/test/resources/creds/nobody-2.p12", 404, new FailedLoginException() },
+                new Object[] { "testCase1", 200, null },
+                new Object[] { "testCase1", 404, new FailedLoginException() },
+                new Object[] { "testCase2", 200, new CertificateException() },
         };
     }
 
     @Test(dataProvider = "data")
-    public void testAuthenticate(final String pkcs12Path, final int status, final Exception expected) throws Exception {
+    public void testAuthenticate(final String trustEngineBean, final int status, final Exception expected)
+            throws Exception {
         Server server = null;
         try {
-            server = startServer(pkcs12Path, new ConfigurableStatusHandler(status));
-            final ProxyIdentifiers ids = proxyAuthenticator.authenticate(new URI("https://localhost:8443/"));
+            server = startServer(new ConfigurableStatusHandler(status));
+            final TrustEngine<X509Credential> trustEngine = context.getBean(trustEngineBean, TrustEngine.class);
+            assertNotNull(trustEngine);
+            final PkixProxyAuthenticator authenticator = new PkixProxyAuthenticator(trustEngine);
+            authenticator.authenticate(new URI("https://localhost:8443/?pgtId=A&pgtIOU=B"));
             if (expected != null) {
                 fail("Proxy authentication should have failed with " + expected);
             }
-            assertNotNull(ids);
-            assertNotNull(ids.getPgtId());
-            assertNotNull(ids.getPgtIou());
         } catch (Exception e) {
             if (expected == null) {
                 throw e;
@@ -85,12 +83,12 @@ public class PkixProxyAuthenticatorTest extends AbstractTestNGSpringContextTests
         }
     }
 
-    private Server startServer(final String pkcs12Path, final Handler handler) {
+    private Server startServer(final Handler handler) {
         final Server server = new Server();
 
         final SslContextFactory sslContextFactory = new SslContextFactory();
         sslContextFactory.setKeyStoreType("PKCS12");
-        sslContextFactory.setKeyStorePath(pkcs12Path);
+        sslContextFactory.setKeyStorePath("src/test/resources/creds/nobody-1.p12");
         sslContextFactory.setKeyStorePassword("changeit");
         final ServerConnector connector = new ServerConnector(server, sslContextFactory);
         connector.setHost("127.0.0.1");

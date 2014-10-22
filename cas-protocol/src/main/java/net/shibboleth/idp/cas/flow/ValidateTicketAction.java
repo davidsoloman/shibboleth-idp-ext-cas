@@ -47,13 +47,17 @@ public class ValidateTicketAction
     private final Logger log = LoggerFactory.getLogger(ValidateTicketAction.class);
 
     /** Manages CAS tickets. */
-    @Nonnull private TicketService ticketService;
+    @Nonnull private final TicketService ticketService;
 
 
-    public void setTicketService(@Nonnull final TicketService ticketService) {
-        this.ticketService = Constraint.isNotNull(ticketService, "Ticket service cannot be null.");
+    /**
+     * Creates a new instance.
+     *
+     * @param ticketService Ticket service component.
+     */
+    public ValidateTicketAction(@Nonnull TicketService ticketService) {
+        this.ticketService = Constraint.isNotNull(ticketService, "TicketService cannot be null");
     }
-
 
     @Nonnull
     @Override

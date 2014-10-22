@@ -10,6 +10,8 @@ import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.net.ssl.SSLContext;
@@ -17,6 +19,8 @@ import javax.net.ssl.SSLException;
 
 import net.shibboleth.idp.cas.config.ProxyGrantingTicketConfiguration;
 import net.shibboleth.idp.profile.config.SecurityConfiguration;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
+import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
@@ -64,26 +68,23 @@ public class PkixProxyAuthenticator extends AbstractProxyAuthenticator {
         @Override
         public boolean isTrusted(final X509Certificate[] certificates, final String authType)
                 throws CertificateException {
-            if (certificates == null || certificates.length == 0) {
+            if (certificates == null || certificates.length < 1) {
                 return false;
             }
-            // Validate the first end-entity certificate
-            for (X509Certificate cert : certificates) {
-                if (cert.getBasicConstraints() < 0) {
-                    try {
-                        log.debug("Validating cert {}", cert.getSubjectDN());
-                        return trustEngine.validate(new BasicX509Credential(certificates[0]), new CriteriaSet());
-                    } catch (SecurityException e) {
-                        throw new CertificateException("X509 validation error", e);
-                    }
-                }
+            // Assume the first certificate is the end-entity cert
+            try {
+                log.debug("Validating cert {} issued by {}",
+                        certificates[0].getSubjectDN().getName(),
+                        certificates[0].getIssuerDN().getName());
+                return trustEngine.validate(new BasicX509Credential(certificates[0]), new CriteriaSet());
+            } catch (SecurityException e) {
+                throw new CertificateException("X509 validation error", e);
             }
-            return false;
         }
     }
 
-    /** Default connection and socket timeout. */
-    private static final int DEFAULT_TIMEOUT = 3000;
+    /** Default connection and socket timeout in ms. */
+    private static final int DEFAULT_TIMEOUT = 800;
 
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(PkixProxyAuthenticator.class);
@@ -93,38 +94,32 @@ public class PkixProxyAuthenticator extends AbstractProxyAuthenticator {
     /** Connection and socket timeout. */
     @Positive private int timeout = DEFAULT_TIMEOUT;
 
+
     /**
      * Creates a new instance.
      *
-     * @param configuration Proxy-granting ticket configuration.
+     * @param x509TrustEngine X.509 trust engine used to validate the TLS certificate presented by the proxy
+     *                        callback endpoint.
      */
-    public PkixProxyAuthenticator(@Nonnull final ProxyGrantingTicketConfiguration configuration) {
-        super(configuration);
+    public PkixProxyAuthenticator(@Nonnull TrustEngine<X509Credential> x509TrustEngine) {
+        Constraint.isNotNull(x509TrustEngine, "Trust engine cannot be null");
         try {
-            final SecurityConfiguration config = configuration.getSecurityConfiguration();
-            final TrustStrategy trustStrategy;
-            if (config != null &&
-                config.getClientTLSValidationConfiguration() != null &&
-                config.getClientTLSValidationConfiguration().getX509TrustEngine() != null) {
-                trustStrategy = new TrustEngineTrustStrategy(
-                        config.getClientTLSValidationConfiguration().getX509TrustEngine());
-            } else {
-                throw new IllegalArgumentException("Must specify X509 trust engine in TLS client security config");
-            }
             SSLContext sslContext = SSLContexts.custom()
                     .useTLS()
-                    .loadTrustMaterial(null, trustStrategy)
+                    .loadTrustMaterial(null, new TrustEngineTrustStrategy(x509TrustEngine))
                     .build();
-            socketFactory = new SSLConnectionSocketFactory(sslContext, configuration.getHostnameVerifier());
+            socketFactory = new SSLConnectionSocketFactory(
+                    sslContext,
+                    SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
         } catch (Exception e) {
             throw new RuntimeException("SSL initialization error", e);
         }
     }
 
     /**
-     * Sets a connection and socket timeout used for making a connection to validate the proxy callback URL.
+     * Sets connect and socket timeouts for HTTP connection to proxy callback endpoint.
      *
-     * @param timeout Non-zero timeout used for both connection and socket timeouts.
+     * @param timeout Non-zero timeout in milliseconds for both connection and socket timeouts.
      */
     public void setTimeout(@Positive final int timeout) {
         this.timeout = (int) Constraint.isGreaterThan(timeout, 0, "Timeout must be positive");
@@ -140,7 +135,6 @@ public class PkixProxyAuthenticator extends AbstractProxyAuthenticator {
             final HttpGet request = new HttpGet(callbackUri);
             request.setConfig(
                     RequestConfig.custom()
-                            .setConnectionRequestTimeout(timeout)
                             .setConnectTimeout(timeout)
                             .setSocketTimeout(timeout)
                             .build());

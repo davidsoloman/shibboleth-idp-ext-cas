@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+
+    <bean id="CAS.ServiceTicketConfig" class="net.shibboleth.idp.cas.config.ServiceTicketConfiguration"
+          p:ticketValidityPeriod="PT15S">
+        <property name="securityConfiguration">
+            <bean class="net.shibboleth.idp.profile.config.SecurityConfiguration"
+                  c:skew="PT5M">
+                <constructor-arg name="generator">
+                    <bean class="net.shibboleth.idp.cas.ticket.TicketIdentifierGenerationStrategy"
+                          c:prefix="ST"
+                          c:randomLength="25" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="CAS.ProxyTicketConfig" class="net.shibboleth.idp.cas.config.ProxyTicketConfiguration"
+          p:ticketValidityPeriod="PT15S">
+        <property name="securityConfiguration">
+            <bean class="net.shibboleth.idp.profile.config.SecurityConfiguration"
+                  c:skew="PT5M">
+                <constructor-arg name="generator">
+                    <bean class="net.shibboleth.idp.cas.ticket.TicketIdentifierGenerationStrategy"
+                          c:prefix="PT"
+                          c:randomLength="25" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="CAS.ProxyGrantingTicketConfig" class="net.shibboleth.idp.cas.config.ProxyGrantingTicketConfiguration"
+          p:ticketValidityPeriod="PT12H">
+        <property name="securityConfiguration">
+            <bean class="net.shibboleth.idp.profile.config.SecurityConfiguration"
+                  c:skew="PT5M"
+                  p:clientTLSValidationConfiguration-ref="CAS.DefaultProxyTLSValidationConfig">
+                <constructor-arg name="generator">
+                    <bean class="net.shibboleth.idp.cas.ticket.TicketIdentifierGenerationStrategy"
+                          c:prefix="PGT"
+                          c:randomLength="50" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- Trust nothing by default -->
+    <bean id="CAS.DefaultProxyTLSValidationConfig"
+          class="org.opensaml.security.x509.tls.impl.BasicClientTLSValidationConfiguration">
+        <property name="x509TrustEngine">
+            <bean class="org.opensaml.security.x509.impl.PKIXX509CredentialTrustEngine">
+                <constructor-arg name="resolver">
+                    <bean class="org.opensaml.security.x509.impl.StaticPKIXValidationInformationResolver"
+                          c:names="#{null}">
+                        <constructor-arg name="info">
+                            <bean class="org.opensaml.security.x509.impl.BasicPKIXValidationInformation"
+                                  c:crls="#{null}"
+                                  c:depth="5"
+                                  c:anchors="#{null}" />
+                        </constructor-arg>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+</beans>

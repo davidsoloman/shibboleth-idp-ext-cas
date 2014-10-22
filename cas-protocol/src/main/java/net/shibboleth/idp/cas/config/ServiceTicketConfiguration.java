@@ -18,6 +18,7 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 import javax.annotation.Nonnull;
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -35,17 +36,17 @@ public class ServiceTicketConfiguration extends AbstractTicketConfiguration
     /** Filters the usable authentication flows. */
     @Nonnull
     @NonnullElements
-    private Set<String> authenticationFlows;
+    private Set<String> authenticationFlows = Collections.emptySet();
 
     /** Selects, and limits, the authentication contexts to use for requests. */
     @Nonnull
     @NonnullElements
-    private List<AuthnContextClassRefPrincipal> defaultAuthenticationContexts;
+    private List<AuthnContextClassRefPrincipal> defaultAuthenticationContexts = Collections.emptyList();
 
     /** Precedence of name identifier formats to use for requests. */
     @Nonnull
     @NonnullElements
-    private List<String> nameIDFormatPrecedence;
+    private List<String> nameIDFormatPrecedence = Collections.emptyList();
 
 
     /** Creates a new instance. */

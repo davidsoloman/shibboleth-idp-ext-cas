@@ -47,9 +47,14 @@ public class ValidateIdpSessionAction extends AbstractProfileAction {
     private final Logger log = LoggerFactory.getLogger(ValidateIdpSessionAction.class);
 
     /** Looks up IdP sessions. */
-    @Nonnull private SessionResolver sessionResolver;
+    @Nonnull private final SessionResolver sessionResolver;
 
-    public void setSessionResolver(@Nonnull final SessionResolver resolver) {
+
+    /**
+     * Creates a new instance.
+     * @param resolver IdP session resolver component.
+     */
+    public ValidateIdpSessionAction(@Nonnull SessionResolver resolver) {
         this.sessionResolver = Constraint.isNotNull(resolver, "Session resolver cannot be null.");
     }
 

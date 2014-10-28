@@ -11,6 +11,7 @@ import net.shibboleth.idp.cas.ticket.ProxyGrantingTicket;
 import net.shibboleth.idp.cas.ticket.TicketContext;
 import net.shibboleth.idp.cas.ticket.TicketService;
 import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.idp.profile.ActionSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -80,6 +81,6 @@ public class InitializeProxyAction extends AbstractProfileAction {
             log.error("Failed looking up " + proxyTicketRequest.getPgt(), e);
             return ProtocolError.TicketRetrievalError.event(this);
         }
-        return Events.Proceed.event(this);
+        return ActionSupport.buildProceedEvent(this);
     }
 }

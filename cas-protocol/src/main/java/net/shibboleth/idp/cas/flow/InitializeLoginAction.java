@@ -11,6 +11,7 @@ import net.shibboleth.idp.cas.protocol.ProtocolParam;
 import net.shibboleth.idp.cas.protocol.SamlParam;
 import net.shibboleth.idp.cas.protocol.ServiceTicketRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.idp.profile.ActionSupport;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.core.collection.ParameterMap;
@@ -65,6 +66,6 @@ public class InitializeLoginAction extends AbstractProfileAction<ServiceTicketRe
         messageContext.setMessage(serviceTicketRequest);
         profileRequestContext.setInboundMessageContext(messageContext);
         FlowStateSupport.setServiceTicketRequest(springRequestContext, serviceTicketRequest);
-        return Events.Proceed.event(this);
+        return ActionSupport.buildProceedEvent(this);
     }
 }

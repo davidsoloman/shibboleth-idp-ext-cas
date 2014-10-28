@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
             "/system/conf/global-system.xml",
             "/system/conf/mvc-beans.xml",
             "/system/conf/relying-party-system.xml",
-            "/test/test-beans.xml",
+            "/test/test-service-registry.xml",
             "/test/test-webflow-config.xml",
             "/flows/cas/login/login-beans.xml",
             "/flows/cas/serviceValidate/serviceValidate-beans.xml",
@@ -56,6 +56,10 @@ public abstract class AbstractProfileActionTest extends AbstractTestNGSpringCont
         final ProfileRequestContext profileRequestContext = new ProfileRequestContext();
         requestContext.getConversationScope().put(ProfileRequestContext.BINDING_KEY, profileRequestContext);
         return requestContext;
+    }
+
+    protected static ProfileRequestContext getProfileContext(final RequestContext context) {
+        return (ProfileRequestContext) context.getConversationScope().get(ProfileRequestContext.BINDING_KEY);
     }
 
     protected static RequestContext createSessionContext(final String sessionId) {

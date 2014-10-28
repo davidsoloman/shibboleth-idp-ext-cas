@@ -25,8 +25,12 @@
     <bean id="initProfileRequestContext"
           class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" />
 
+    <bean id="buildRelyingPartyContextAction"
+          class="net.shibboleth.idp.cas.flow.BuildRelyingPartyContextAction"
+          c:registry-ref="cas.serviceRegistry"/>
+
     <bean id="validateIdPSessionAction"
           class="net.shibboleth.idp.cas.flow.ValidateIdpSessionAction"
-          p:sessionResolver-ref="shibboleth.SessionManager" />
+          c:resolver-ref="shibboleth.SessionManager" />
 
 </beans>

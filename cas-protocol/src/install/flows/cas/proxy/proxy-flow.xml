@@ -10,6 +10,8 @@
     <action-state id="initializeProxy">
         <evaluate expression="initProfileRequestContext"/>
         <evaluate expression="initializeProxyAction" />
+        <evaluate expression="buildRelyingPartyContextAction" />
+        <evaluate expression="'proceed'" />
         <transition on="serviceNotSpecified" to="proxyFailure" />
         <transition on="ticketNotSpecified" to="proxyFailure" />
         <transition on="ticketRetrievalError" to="proxyFailure" />

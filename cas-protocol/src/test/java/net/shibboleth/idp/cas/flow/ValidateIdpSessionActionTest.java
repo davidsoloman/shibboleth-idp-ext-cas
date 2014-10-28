@@ -26,7 +26,6 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
 
     private static final String TEST_SERVICE = "https://example.com/widget";
 
-    @Autowired
     private ValidateIdpSessionAction action;
 
     @Autowired
@@ -44,7 +43,7 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
         final RequestContext context = createTicketContext(ticket);
         final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
         FlowStateSupport.setTicketValidationRequest(context, request);
-        action.setSessionResolver(mockResolver(createSession(TEST_SESSION_ID, true)));
+        action = new ValidateIdpSessionAction(mockResolver(createSession(TEST_SESSION_ID, true)));
         assertEquals(action.execute(context).getId(), Events.Success.id());
     }
 
@@ -54,7 +53,7 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
         final RequestContext context = createTicketContext(ticket);
         final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
         FlowStateSupport.setTicketValidationRequest(context, request);
-        action.setSessionResolver(mockResolver(createSession(TEST_SESSION_ID, false)));
+        action = new ValidateIdpSessionAction(mockResolver(createSession(TEST_SESSION_ID, false)));
         assertEquals(action.execute(context).getId(), ProtocolError.SessionExpired.id());
     }
 
@@ -66,7 +65,7 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
         FlowStateSupport.setTicketValidationRequest(context, request);
         final SessionResolver throwingSessionResolver = mock(SessionResolver.class);
         when(throwingSessionResolver.resolveSingle(any(CriteriaSet.class))).thenThrow(new ResolverException("Broken"));
-        action.setSessionResolver(throwingSessionResolver);
+        action = new ValidateIdpSessionAction(throwingSessionResolver);
     }
 
     private SessionResolver mockResolver(final IdPSession session) {

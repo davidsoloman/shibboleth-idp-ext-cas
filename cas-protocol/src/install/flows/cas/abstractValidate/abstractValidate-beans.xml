@@ -24,14 +24,17 @@
     <bean id="validateRenewAction"
           class="net.shibboleth.idp.cas.flow.ValidateRenewAction" />
 
+    <bean id="checkProxyAuthorizationAction"
+          class="net.shibboleth.idp.cas.flow.CheckProxyAuthorizationAction" />
+
     <bean id="validateProxyCallbackAction"
           class="net.shibboleth.idp.cas.flow.ValidateProxyCallbackAction"
           c:configuration="#{@'CAS.ProxyGrantingTicketConfig'}"
           c:proxyAuthenticator-ref="cas.proxyAuthenticator"
           c:ticketService-ref="cas.ticketService" />
 
-    <bean id="buildRelyingPartyContextAction"
-          class="net.shibboleth.idp.cas.flow.BuildRelyingPartyContextAction" />
+    <bean id="buildAttributeContextAction"
+          class="net.shibboleth.idp.cas.flow.BuildAttributeContextAction" />
 
     <bean id="resolveAttributes"
           class="net.shibboleth.idp.profile.impl.ResolveAttributes"

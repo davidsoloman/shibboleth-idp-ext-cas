@@ -10,6 +10,7 @@ import net.shibboleth.idp.cas.protocol.ProtocolError;
 import net.shibboleth.idp.cas.protocol.ProtocolParam;
 import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.idp.profile.ActionSupport;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.core.collection.ParameterMap;
@@ -58,6 +59,6 @@ public class InitializeValidateAction extends AbstractProfileAction {
         messageContext.setMessage(ticketValidationRequest);
         profileRequestContext.setInboundMessageContext(messageContext);
         FlowStateSupport.setTicketValidationRequest(springRequestContext, ticketValidationRequest);
-        return Events.Proceed.event(this);
+        return ActionSupport.buildProceedEvent(this);
     }
 }

@@ -11,6 +11,7 @@ import net.shibboleth.idp.cas.protocol.ProtocolParam;
 import net.shibboleth.idp.cas.protocol.SamlParam;
 import net.shibboleth.idp.cas.protocol.TicketValidationRequest;
 import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.idp.profile.ActionSupport;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.saml.common.SAMLObject;
@@ -68,6 +69,6 @@ public class ProcessSamlMessageAction extends AbstractProfileAction<SAMLObject, 
         }
 
         FlowStateSupport.setTicketValidationRequest(springRequestContext, ticketValidationRequest);
-        return Events.Proceed.event(this);
+        return ActionSupport.buildProceedEvent(this);
     }
 }

@@ -44,6 +44,7 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
         final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
         FlowStateSupport.setTicketValidationRequest(context, request);
         action = new ValidateIdpSessionAction(mockResolver(createSession(TEST_SESSION_ID, true)));
+        action.initialize();
         assertEquals(action.execute(context).getId(), Events.Success.id());
     }
 
@@ -54,6 +55,7 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
         final TicketValidationRequest request = new TicketValidationRequest(TEST_SERVICE, ticket.getId());
         FlowStateSupport.setTicketValidationRequest(context, request);
         action = new ValidateIdpSessionAction(mockResolver(createSession(TEST_SESSION_ID, false)));
+        action.initialize();
         assertEquals(action.execute(context).getId(), ProtocolError.SessionExpired.id());
     }
 
@@ -66,6 +68,8 @@ public class ValidateIdpSessionActionTest extends AbstractProfileActionTest {
         final SessionResolver throwingSessionResolver = mock(SessionResolver.class);
         when(throwingSessionResolver.resolveSingle(any(CriteriaSet.class))).thenThrow(new ResolverException("Broken"));
         action = new ValidateIdpSessionAction(throwingSessionResolver);
+        action.initialize();
+        assertEquals(action.execute(context).getId(), ProtocolError.SessionRetrievalError.id());
     }
 
     private SessionResolver mockResolver(final IdPSession session) {

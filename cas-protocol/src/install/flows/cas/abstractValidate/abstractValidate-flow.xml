@@ -8,12 +8,9 @@
           http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd"
       abstract="true">
 
-    <action-state id="initializeValidate">
+    <on-start>
         <evaluate expression="initProfileRequestContext"/>
-        <evaluate expression="buildRelyingPartyContextAction" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="validateTicket" />
-    </action-state>
+    </on-start>
 
     <action-state id="validateTicket">
         <evaluate expression="validateTicketAction" />
